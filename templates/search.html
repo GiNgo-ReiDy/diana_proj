@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск университетов</title>
+</head>
+<body>
+    <h1>Поиск университетов</h1>
+    <form method="get">
+        <label for="program">Программа:</label>
+        <input type="text" id="program" name="program"><br>
+        <label for="subjects">Предметы:</label>
+        <input type="text" id="subjects" name="subjects"><br>
+        <label for="city">Город академической мобильности:</label>
+        <input type="text" id="city" name="city"><br>
+        <button type="submit">Искать</button>
+    </form>
+
+    {% if universities %}
+        <h2>Результаты поиска:</h2>
+        <ul>
+            {% for university in universities %}
+                <li>
+                    {{ university.name }}
+                    <ul>
+                        {% for program in university.programs %}
+                            <li>Программа: {{program.name}}, Предметы: {{ program.required_subjects }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</body>
+</html>

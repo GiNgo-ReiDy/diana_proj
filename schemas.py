@@ -1,0 +1,37 @@
+from typing import List, Optional
+from pydantic import BaseModel
+
+class UniversityBase(BaseModel):
+    name: str
+    country: Optional[str] = None
+
+class University(UniversityBase):
+    id: int
+    programs: List['Program'] = []
+
+    class Config:
+        orm_mode = True
+
+class ProgramBase(BaseModel):
+    name: str
+    required_subjects: str
+
+class Program(ProgramBase):
+    id: int
+    university: University
+    cities: List['City'] = []
+
+    class Config:
+        orm_mode = True
+
+class CityBase(BaseModel):
+    name: str
+
+class City(CityBase):
+    id: int
+    programs: List['Program'] = []
+
+    class Config:
+        orm_mode = True
+
+
