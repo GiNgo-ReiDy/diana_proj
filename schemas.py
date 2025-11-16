@@ -10,7 +10,7 @@ class University(UniversityBase):
     programs: List['Program'] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ProgramBase(BaseModel):
     name: str
@@ -22,7 +22,7 @@ class Program(ProgramBase):
     cities: List['City'] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CityBase(BaseModel):
     name: str
@@ -32,6 +32,6 @@ class City(CityBase):
     programs: List['Program'] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
