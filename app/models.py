@@ -1,39 +1,26 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, Table
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import String, Integer, Text, ForeignKey
+from sqlalchemy.dialects.postgresql import ARRAY
 
-from app.database import Base
-
-program_cities_association = Table(
-    'program_cities',
-    Base.metadata,
-    Column('program_id', Integer, ForeignKey('programs.id'), primary_key=True),
-    Column('city_id', Integer, ForeignKey('cities.id'), primary_key=True)
-)
+class Base(DeclarativeBase):
+    pass
 
 class University(Base):
     __tablename__ = 'university'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, nullable=False)
-    country = Column(String)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String)
+    cities: Mapped[list] = mapped_column(ARRAY(Text))
 
     programs = relationship("Program", back_populates="university")
 
 class Program(Base):
-    __tablename__ = 'programs'
+    __tablename__ = 'program'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    university_id = Column(Integer, ForeignKey('university.id'))
-    required_subjects = Column(String)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String)
+    university_id: Mapped[int] = mapped_column(Integer, ForeignKey('university.id'))
+    required_subjects: Mapped[list] = mapped_column(ARRAY(Text))
 
     university = relationship("University", back_populates="programs")
-    cities = relationship("City", secondary=program_cities_association, back_populates="programs")
 
-class City(Base):
-    __tablename__ = 'cities'
-    id = Column(Integer, primary_key=True, index=True)
-    # program_id = Column(Integer, ForeignKey('programs.id'))
-    name = Column(String, unique=True, nullable=False)
-
-    programs = relationship("Program", secondary=program_cities_association, back_populates="cities")

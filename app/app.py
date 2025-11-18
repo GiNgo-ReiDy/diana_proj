@@ -1,81 +1,95 @@
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends, Query
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
-from starlette.responses import HTMLResponse
-from starlette.middleware.base import BaseHTTPMiddleware
-import os
-import logging
-import time
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
+from pathlib import Path
+from logging import getLogger
 
-from app.crud import get_university
-from app.schemas import University
-from app.database import SessionLocal, init_db
-from app.api.data import router as api_router_universities
+from app.database import get_session
+from models import University, Program
+
+router = APIRouter()
+logger = getLogger(__name__)
+BASE_DIR = Path(__file__).resolve().parent.parent  # путь к проекту
+TEMPLATES_DIR = BASE_DIR / "app" / "templates"
+
+# Настройка шаблонов
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
-
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-app = FastAPI()
-
-app.include_router(api_router_universities, prefix="/api/universities")
-
-# Middleware для логирования всех запросов
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start_time = time.time()
-    logger.info(f"Входящий запрос: {request.method} {request.url}")
-    try:
-        response = await call_next(request)
-        process_time = time.time() - start_time
-        logger.info(f"Ответ отправлен: {response.status_code} за {process_time:.3f}с")
-        return response
-    except Exception as e:
-        logger.error(f"Ошибка при обработке запроса: {e}", exc_info=True)
-        raise
-
-# Инициализация базы данных при старте
-@app.on_event("startup")
-async def startup_event():
-    try:
-        init_db()
-        logger.info("База данных инициализирована успешно")
-    except Exception as e:
-        logger.error(f"Ошибка при инициализации базы данных: {e}", exc_info=True)
-
-# Настройка статических файлов и шаблонов
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-static_dir = os.path.join(BASE_DIR, "static")
-templates_dir = os.path.join(BASE_DIR, "templates")
-
-if os.path.exists(static_dir):
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
-templates = Jinja2Templates(directory=templates_dir)
-
-# Убрал глобальный обработчик - он может мешать нормальной работе FastAPI
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-@app.get("/", response_class=HTMLResponse)
-async def search_universities(request: Request, program: str = None, subjects: str = None, city: str = None, db: Session = Depends(get_db)):
+@router.get("/", response_class=HTMLResponse)
+async def search_universities(
+        request: Request,
+        program: str = Query(None),
+        subjects: str = Query(None),
+        city: str = Query(None),
+        session: AsyncSession = Depends(get_session),
+):
     logger.info("=" * 50)
     logger.info("ENDPOINT ВЫЗВАН!")
     logger.info(f"Запрос получен: program={program}, subjects={subjects}, city={city}")
     try:
-        logger.info("Вызываю get_university...")
-        universities = get_university(db, program=program, subjects=subjects, city=city)
+        # Используем асинхронный запрос к базе данных
+        stmt = select(University).options(selectinload(University.programs))
+
+        # Применяем фильтры, если они указаны
+        if program or subjects or city:
+            # Если есть фильтры, используем подзапросы
+            university_ids = None
+
+            if program:
+                program_stmt = select(Program.university_id).where(
+                    Program.name.ilike(f"%{program}%")
+                )
+                result = await session.execute(program_stmt)
+                program_ids = {row[0] for row in result.all() if row[0]}
+                university_ids = program_ids if university_ids is None else university_ids & program_ids
+
+            if subjects:
+                # required_subjects - это массив, используем array_to_string для поиска
+                subjects_stmt = select(Program.university_id).where(
+                    func.array_to_string(Program.required_subjects, ',').ilike(f"%{subjects}%")
+                )
+                result = await session.execute(subjects_stmt)
+                subjects_ids = {row[0] for row in result.all() if row[0]}
+                university_ids = subjects_ids if university_ids is None else university_ids & subjects_ids
+
+            if city:
+                # Проверяем города в массиве cities университета
+                # Для PostgreSQL ARRAY используем array_to_string для поиска
+                city_stmt = select(University.id).where(
+                    func.array_to_string(University.cities, ',').ilike(f"%{city}%")
+                )
+                result = await session.execute(city_stmt)
+                city_ids = {row[0] for row in result.all() if row[0]}
+                university_ids = city_ids if university_ids is None else university_ids & city_ids
+
+            if university_ids is not None:
+                if not university_ids:
+                    # Нет совпадений
+                    universities = []
+                else:
+                    stmt = stmt.where(University.id.in_(list(university_ids)))
+                    result = await session.execute(stmt)
+                    universities = result.scalars().all()
+            else:
+                # Нет фильтров, возвращаем все
+                result = await session.execute(stmt)
+                universities = result.scalars().all()
+        else:
+            # Нет фильтров, возвращаем все
+            result = await session.execute(stmt)
+            universities = result.scalars().all()
+
         logger.info(f"Найдено университетов: {len(universities)}")
-        logger.info(f"Путь к шаблонам: {os.path.join(BASE_DIR, 'templates')}")
+        logger.info(f"Путь к шаблонам: {TEMPLATES_DIR}")
         logger.info("Формирую ответ...")
-        response = templates.TemplateResponse("main.html", {"request": request, "universities": universities or []})
+        response = templates.TemplateResponse("main.html", {
+            "request": request,
+            "universities": universities or []
+        })
         logger.info("Ответ сформирован успешно, возвращаю...")
         return response
     except Exception as e:
@@ -84,23 +98,24 @@ async def search_universities(request: Request, program: str = None, subjects: s
         error_trace = traceback.format_exc()
         logger.error(f"Полный traceback: {error_trace}")
         try:
-            # Пытаемся вернуть страницу с ошибкой
+            # пытаемся вернуть страницу с ошибкой
             return templates.TemplateResponse("main.html", {
-                "request": request, 
+                "request": request,
                 "universities": [],
                 "error": f"Ошибка при загрузке данных: {str(e)}"
             })
         except Exception as e2:
-            # Если даже шаблон не может быть отрендерен, возвращаем простой текст
+            # если даже шаблон не может быть отрендерен, возвращаем простой текст
             logger.error(f"Критическая ошибка при рендеринге шаблона: {e2}", exc_info=True)
-            from fastapi.responses import PlainTextResponse
-            return PlainTextResponse(f"Критическая ошибка: {str(e)}\n\nTraceback:\n{error_trace}", status_code=500)
+            return HTMLResponse(content=f"<h1>Критическая ошибка:</h1><p>{str(e)}</p>", status_code=500)
 
-@app.get("/admin", response_class=HTMLResponse)
+
+@router.get("/admin", response_class=HTMLResponse)
 async def admin_panel(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request})
 
-@app.get("/admin_auth", response_class=HTMLResponse)
+
+@router.get("/admin_auth", response_class=HTMLResponse)
 async def admin_auth_panel(request: Request):
     return templates.TemplateResponse("admin_auth.html", {"request": request})
 

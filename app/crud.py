@@ -1,105 +1,115 @@
-from sqlalchemy.orm import Session, joinedload
-from app.models import University, Program, City
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+from sqlalchemy import select, func, delete
+from app.models import University, Program
 import logging
 
 logger = logging.getLogger(__name__)
 
-def get_universities(db: Session, skip: int = 0, limit: int = 100):
+async def get_universities(db: AsyncSession, skip: int = 0, limit: int = 100):
     try:
-        return db.query(University).options(joinedload(University.programs)).offset(skip).limit(limit).all()
+        stmt = select(University).options(selectinload(University.programs)).offset(skip).limit(limit)
+        result = await db.execute(stmt)
+        return result.scalars().all()
     except Exception as e:
         logger.error(f"Ошибка в get_universities: {e}", exc_info=True)
         raise
 
-def get_university(db: Session, program: str = None, subjects: str = None, city: str = None):
+async def get_university(db: AsyncSession, program: str = None, subjects: str = None, city: str = None):
     try:
-        query = db.query(University).options(joinedload(University.programs))
+        stmt = select(University).options(selectinload(University.programs))
 
         if not program and not subjects and not city:
-            return query.all()
+            result = await db.execute(stmt)
+            return result.scalars().all()
 
         university_ids = None
 
         if program:
-            ids = db.query(Program.university_id).filter(
+            program_stmt = select(Program.university_id).where(
                 Program.name.ilike(f"%{program}%")
-            ).distinct().all()
-            program_ids = {i[0] for i in ids if i[0]}
+            ).distinct()
+            result = await db.execute(program_stmt)
+            program_ids = {row[0] for row in result.all() if row[0]}
             university_ids = program_ids if university_ids is None else university_ids & program_ids
 
         if subjects:
-            ids = db.query(Program.university_id).filter(
-                Program.required_subjects.ilike(f"%{subjects}%")
-            ).distinct().all()
-            subjects_ids = {i[0] for i in ids if i[0]}
+            subjects_stmt = select(Program.university_id).where(
+                func.array_to_string(Program.required_subjects, ',').ilike(f"%{subjects}%")
+            ).distinct()
+            result = await db.execute(subjects_stmt)
+            subjects_ids = {row[0] for row in result.all() if row[0]}
             university_ids = subjects_ids if university_ids is None else university_ids & subjects_ids
 
         if city:
-            # проверка на существование relationship 'cities' в модели Program
-            if hasattr(Program, 'cities'):
-                ids = db.query(Program.university_id).join(
-                    Program.cities
-                ).filter(City.name.ilike(f"%{city}%")).distinct().all()
-                city_ids = {i[0] for i in ids if i[0]}
-                university_ids = city_ids if university_ids is None else university_ids & city_ids
+            # Проверяем города в массиве cities университета
+            city_stmt = select(University.id).where(
+                func.array_to_string(University.cities, ',').ilike(f"%{city}%")
+            )
+            result = await db.execute(city_stmt)
+            city_ids = {row[0] for row in result.all() if row[0]}
+            university_ids = city_ids if university_ids is None else university_ids & city_ids
 
         if university_ids is not None and not university_ids:
             return []
 
         if university_ids is not None:
-            query = query.filter(University.id.in_(list(university_ids)))
+            stmt = stmt.where(University.id.in_(list(university_ids)))
 
-        return query.all()
+        result = await db.execute(stmt)
+        return result.scalars().all()
 
     except Exception as e:
         logger.error(f"Ошибка в get_university: {e}", exc_info=True)
         raise
 
-def add_university(db: Session, name: str, country: str):
+async def add_university(db: AsyncSession, name: str, cities: list = None):
     try:
-        db_university = University(name=name, country=country)
+        db_university = University(name=name, cities=cities or [])
         db.add(db_university)
-        db.commit()
-        db.refresh(db_university)
+        await db.commit()
+        await db.refresh(db_university)
         return db_university
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         logger.error(f"Ошибка в add_university: {e}", exc_info=True)
         raise
 
-def delete_university(db: Session, university_id: int):
+async def delete_university(db: AsyncSession, university_id: int):
     try:
-        db_university = db.query(University).filter(University.id == university_id).first()
-        if db_university:
-            db.delete(db_university)
-            db.commit()
-            return True
-        return False
+        stmt = delete(University).where(University.id == university_id)
+        result = await db.execute(stmt)
+        await db.commit()
+        return result.rowcount > 0
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         logger.error(f"Ошибка в delete_university: {e}", exc_info=True)
         raise
 
-def update_university(db: Session, university_id: int, name: str = None, country: str = None):
+async def update_university(db: AsyncSession, university_id: int, name: str = None, cities: list = None):
     try:
-        db_university = db.query(University).filter(University.id == university_id).first()
+        stmt = select(University).where(University.id == university_id)
+        result = await db.execute(stmt)
+        db_university = result.scalar_one_or_none()
         if db_university:
             if name:
                 db_university.name = name
-            if country:
-                db_university.country = country
-            db.commit()
-            db.refresh(db_university)
+            if cities is not None:
+                db_university.cities = cities
+            await db.commit()
+            await db.refresh(db_university)
             return db_university
         return None
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         logger.error(f"Ошибка в update_university: {e}", exc_info=True)
         raise
 
-def get_university_by_id(db: Session, university_id: int):
+async def get_university_by_id(db: AsyncSession, university_id: int):
     try:
-        return db.query(University).options(joinedload(University.programs)).filter(University.id == university_id).first()
+        stmt = select(University).options(selectinload(University.programs)).where(University.id == university_id)
+        result = await db.execute(stmt)
+        return result.scalar_one_or_none()
     except Exception as e:
         logger.error(f"Ошибка в get_university_by_id: {e}", exc_info=True)
         raise
