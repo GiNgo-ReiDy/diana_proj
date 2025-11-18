@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск университетов</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+
+<header>
+    Университетский портал
+</header>
+
+<nav>
+    <a href="/">Главная</a>
+    <a href="/">Поиск</a>
+</nav>
+
+<main>
+    <div class="container-form">
+        <h1>Поиск университетов</h1>
+
+        <form id="search-form">
+            <label for="program">Программа:</label>
+            <input type="text" id="program" name="program">
+
+            <label for="subjects">Предметы:</label>
+            <input type="text" id="subjects" name="subjects">
+
+            <label for="city">Город академической мобильности:</label>
+            <input type="text" id="city" name="city">
+
+            <button type="submit">Искать</button>
+        </form>
+
+        <div class="error-box" id="error-box" style="display: none;"></div>
+    </div>
+
+    <div class="container-results">
+        <h2>Результаты поиска:</h2>
+        <div id="results"></div>
+    </div>
+</main>
+
+</body>
+</html>

@@ -8,15 +8,20 @@ import os
 import logging
 import time
 
-from crud import get_university
-from schemas import University
-from database import SessionLocal, init_db
+from app.crud import get_university
+from app.schemas import University
+from app.database import SessionLocal, init_db
+from app.api.data import router as api_router_universities
 
-# Настройка логирования
+
+
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+app.include_router(api_router_universities, prefix="/api/universities")
 
 # Middleware для логирования всех запросов
 @app.middleware("http")
@@ -70,7 +75,7 @@ async def search_universities(request: Request, program: str = None, subjects: s
         logger.info(f"Найдено университетов: {len(universities)}")
         logger.info(f"Путь к шаблонам: {os.path.join(BASE_DIR, 'templates')}")
         logger.info("Формирую ответ...")
-        response = templates.TemplateResponse("search.html", {"request": request, "universities": universities or []})
+        response = templates.TemplateResponse("main.html", {"request": request, "universities": universities or []})
         logger.info("Ответ сформирован успешно, возвращаю...")
         return response
     except Exception as e:
@@ -80,7 +85,7 @@ async def search_universities(request: Request, program: str = None, subjects: s
         logger.error(f"Полный traceback: {error_trace}")
         try:
             # Пытаемся вернуть страницу с ошибкой
-            return templates.TemplateResponse("search.html", {
+            return templates.TemplateResponse("main.html", {
                 "request": request, 
                 "universities": [],
                 "error": f"Ошибка при загрузке данных: {str(e)}"
@@ -91,5 +96,11 @@ async def search_universities(request: Request, program: str = None, subjects: s
             from fastapi.responses import PlainTextResponse
             return PlainTextResponse(f"Критическая ошибка: {str(e)}\n\nTraceback:\n{error_trace}", status_code=500)
 
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_panel(request: Request):
+    return templates.TemplateResponse("admin.html", {"request": request})
 
+@app.get("/admin_auth", response_class=HTMLResponse)
+async def admin_auth_panel(request: Request):
+    return templates.TemplateResponse("admin_auth.html", {"request": request})
 

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, Table
 from sqlalchemy.orm import relationship
 
-from database import Base
+from app.database import Base
 
 program_cities_association = Table(
     'program_cities',

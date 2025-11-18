@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админка — Университеты</title>
+    <style>
+        @import url("/static/css/admin.css");
+    </style>
+</head>
+<body>
+
+<h1>Администрирование университетов</h1>
+
+<div class="top-bar">
+    <button class="add-btn" onclick="window.location.href='/admin/universities/add'">Добавить университет</button>
+
+    <div class="search-box">
+        <input type="text" placeholder="Поиск..." id="searchInput" onkeyup="searchTable()">
+    </div>
+</div>
+
+<table id="uniTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Страна</th>
+            <th>Город</th>
+            <th>Предметы</th>
+            <th>Программа</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in universities %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.name }}</td>
+            <td>{{ u.country }}</td>
+            <td>{{ u.city }}</td>
+            <td>{{ u.subjects }}</td>
+            <td>{{ u.program }}</td>
+            <td class="actions">
+                <button class="edit-btn" onclick="window.location.href='/admin/universities/{{u.id}}/edit'">Редактировать</button>
+                <button class="delete-btn" onclick="if(confirm('Удалить?')) window.location.href='/admin/universities/{{u.id}}/delete'">Удалить</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+function searchTable() {
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.querySelectorAll("#uniTable tbody tr");
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
+}
+</script>
+
+</body>
+</html>

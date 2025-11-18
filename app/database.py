@@ -15,7 +15,7 @@ Base = declarative_base()
 # Инициализация таблиц
 def init_db():
     try:
-        from models import University, Program, City  # Импортируем после создания Base
+        from app.models import University, Program, City  
         import logging
         logger = logging.getLogger(__name__)
         logger.info("Создание таблиц в базе данных...")
