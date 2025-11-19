@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Request, Depends, Query
+from importlib.metadata import distribution
+from sqlalchemy import or_
+from fastapi import APIRouter, Request, Depends, Query, FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,10 +8,14 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from pathlib import Path
 from logging import getLogger
+from typing import List, Optional
+
+from sqlmodel import distinct
 
 from app.database import get_session
-from models import University, Program
+from app.models import University, Program
 
+app =FastAPI()
 router = APIRouter()
 logger = getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent.parent  # путь к проекту
@@ -19,79 +25,62 @@ TEMPLATES_DIR = BASE_DIR / "app" / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
-@router.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
 async def search_universities(
         request: Request,
-        program: str = Query(None),
-        subjects: str = Query(None),
-        city: str = Query(None),
+        subjects: Optional[List[str]] = None,
+        cities: Optional[List[str]] = None,
         session: AsyncSession = Depends(get_session),
 ):
     logger.info("=" * 50)
     logger.info("ENDPOINT ВЫЗВАН!")
-    logger.info(f"Запрос получен: program={program}, subjects={subjects}, city={city}")
+    logger.info(f"Запрос получен: subjects={subjects}, city={cities}")
     try:
         # Используем асинхронный запрос к базе данных
         stmt = select(University).options(selectinload(University.programs))
 
-        # Применяем фильтры, если они указаны
-        if program or subjects or city:
-            # Если есть фильтры, используем подзапросы
-            university_ids = None
-
-            if program:
-                program_stmt = select(Program.university_id).where(
-                    Program.name.ilike(f"%{program}%")
-                )
-                result = await session.execute(program_stmt)
-                program_ids = {row[0] for row in result.all() if row[0]}
-                university_ids = program_ids if university_ids is None else university_ids & program_ids
+        university_ids = set()
+        if subjects or cities:
 
             if subjects:
-                # required_subjects - это массив, используем array_to_string для поиска
-                subjects_stmt = select(Program.university_id).where(
-                    func.array_to_string(Program.required_subjects, ',').ilike(f"%{subjects}%")
-                )
+                conditions = [
+                    Program.required_subjects.contains(subject) for subject in subjects
+                ]
+                subjects_stmt = select(distinct(Program.university_id)).filter(*conditions)
                 result = await session.execute(subjects_stmt)
-                subjects_ids = {row[0] for row in result.all() if row[0]}
-                university_ids = subjects_ids if university_ids is None else university_ids & subjects_ids
+                subjects_ids = {row[0] for row in result.all()}
+                university_ids.update(subjects_ids)
 
-            if city:
-                # Проверяем города в массиве cities университета
-                # Для PostgreSQL ARRAY используем array_to_string для поиска
-                city_stmt = select(University.id).where(
-                    func.array_to_string(University.cities, ',').ilike(f"%{city}%")
-                )
+            if cities:
+                city_conditions = [
+                    func.array_to_string(University.cities, ',').ilike(f"%{city}%" for city in cities)
+                ]
+                city_stmt = select(University.id).where(or_(*city_conditions))
                 result = await session.execute(city_stmt)
-                city_ids = {row[0] for row in result.all() if row[0]}
-                university_ids = city_ids if university_ids is None else university_ids & city_ids
+                city_ids = {row[0] for row in result.all()}
+                university_ids.update(city_ids)
 
-            if university_ids is not None:
-                if not university_ids:
-                    # Нет совпадений
-                    universities = []
-                else:
-                    stmt = stmt.where(University.id.in_(list(university_ids)))
-                    result = await session.execute(stmt)
-                    universities = result.scalars().all()
-            else:
-                # Нет фильтров, возвращаем все
+            if university_ids:
+                stmt = stmt.where(University.id.in_(list(university_ids)))
                 result = await session.execute(stmt)
                 universities = result.scalars().all()
+            else:
+                universities = []
         else:
-            # Нет фильтров, возвращаем все
-            result = await session.execute(stmt)
-            universities = result.scalars().all()
+            universities = []
 
         logger.info(f"Найдено университетов: {len(universities)}")
         logger.info(f"Путь к шаблонам: {TEMPLATES_DIR}")
         logger.info("Формирую ответ...")
+
         response = templates.TemplateResponse("main.html", {
             "request": request,
-            "universities": universities or []
+            "universities": universities or [],
         })
+
         logger.info("Ответ сформирован успешно, возвращаю...")
         return response
+
     except Exception as e:
         logger.error(f"Ошибка при получении университетов: {e}", exc_info=True)
         import traceback
@@ -110,12 +99,12 @@ async def search_universities(
             return HTMLResponse(content=f"<h1>Критическая ошибка:</h1><p>{str(e)}</p>", status_code=500)
 
 
-@router.get("/admin", response_class=HTMLResponse)
+@app.get("/admin", response_class=HTMLResponse)
 async def admin_panel(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
-@router.get("/admin_auth", response_class=HTMLResponse)
+@app.get("/admin_auth", response_class=HTMLResponse)
 async def admin_auth_panel(request: Request):
     return templates.TemplateResponse("admin_auth.html", {"request": request})
 

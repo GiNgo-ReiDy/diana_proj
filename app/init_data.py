@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from app.models import University, Program, City
+from app.models import University, Program
 
 def get_universities(db: Session, skip: int = 0, limit: int = 100):
     try:

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class UniversityBase(BaseModel):
     name: str
-    country: Optional[str] = None
+    cities: Optional[List[str]] = None
 
 class University(UniversityBase):
     id: int
@@ -14,22 +14,11 @@ class University(UniversityBase):
 
 class ProgramBase(BaseModel):
     name: str
-    required_subjects: str
+    required_subjects: List[str] = []
 
 class Program(ProgramBase):
     id: int
     university: University
-    cities: List['City'] = []
-
-    class Config:
-        from_attributes = True
-
-class CityBase(BaseModel):
-    name: str
-
-class City(CityBase):
-    id: int
-    programs: List['Program'] = []
 
     class Config:
         from_attributes = True

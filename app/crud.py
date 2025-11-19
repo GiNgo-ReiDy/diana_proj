@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, func, delete
 from app.models import University, Program
+from typing import List, Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,23 +16,16 @@ async def get_universities(db: AsyncSession, skip: int = 0, limit: int = 100):
         logger.error(f"Ошибка в get_universities: {e}", exc_info=True)
         raise
 
-async def get_university(db: AsyncSession, program: str = None, subjects: str = None, city: str = None):
+
+async def get_university(db: AsyncSession, subjects: Optional[List[str]] = None, cities: Optional[List[str]] = None):
     try:
         stmt = select(University).options(selectinload(University.programs))
 
-        if not program and not subjects and not city:
+        if not subjects and not cities:
             result = await db.execute(stmt)
             return result.scalars().all()
 
         university_ids = None
-
-        if program:
-            program_stmt = select(Program.university_id).where(
-                Program.name.ilike(f"%{program}%")
-            ).distinct()
-            result = await db.execute(program_stmt)
-            program_ids = {row[0] for row in result.all() if row[0]}
-            university_ids = program_ids if university_ids is None else university_ids & program_ids
 
         if subjects:
             subjects_stmt = select(Program.university_id).where(
@@ -41,10 +35,10 @@ async def get_university(db: AsyncSession, program: str = None, subjects: str = 
             subjects_ids = {row[0] for row in result.all() if row[0]}
             university_ids = subjects_ids if university_ids is None else university_ids & subjects_ids
 
-        if city:
+        if cities:
             # Проверяем города в массиве cities университета
             city_stmt = select(University.id).where(
-                func.array_to_string(University.cities, ',').ilike(f"%{city}%")
+                func.array_to_string(University.cities, ',').ilike(f"%{cities}%")
             )
             result = await db.execute(city_stmt)
             city_ids = {row[0] for row in result.all() if row[0]}
@@ -63,7 +57,7 @@ async def get_university(db: AsyncSession, program: str = None, subjects: str = 
         logger.error(f"Ошибка в get_university: {e}", exc_info=True)
         raise
 
-async def add_university(db: AsyncSession, name: str, cities: list = None):
+async def add_university(db: AsyncSession, name: str, cities: Optional[List[str]] = None):
     try:
         db_university = University(name=name, cities=cities or [])
         db.add(db_university)
@@ -86,7 +80,7 @@ async def delete_university(db: AsyncSession, university_id: int):
         logger.error(f"Ошибка в delete_university: {e}", exc_info=True)
         raise
 
-async def update_university(db: AsyncSession, university_id: int, name: str = None, cities: list = None):
+async def update_university(db: AsyncSession, university_id: int, name: str = None, cities: Optional[List[str]] = None):
     try:
         stmt = select(University).where(University.id == university_id)
         result = await db.execute(stmt)
