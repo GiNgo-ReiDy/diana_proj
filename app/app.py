@@ -3,6 +3,7 @@ from sqlalchemy import or_
 from fastapi import APIRouter, Request, Depends, Query, FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
@@ -14,16 +15,18 @@ from sqlmodel import distinct
 
 from app.database import get_session
 from app.models import University, Program
+from app.api.data import router as data_router
 
 app =FastAPI()
-router = APIRouter()
 logger = getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent.parent  # путь к проекту
 TEMPLATES_DIR = BASE_DIR / "app" / "templates"
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Настройка шаблонов
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+app.include_router(data_router, prefix="/api/universities", tags=["data"])
 
 @app.get("/", response_class=HTMLResponse)
 async def search_universities(

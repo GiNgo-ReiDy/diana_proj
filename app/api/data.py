@@ -5,7 +5,7 @@ from app.database import get_session
 
 router = APIRouter()  # ← именно router, а не функция
 
-@router.get("")
+@router.get("/")
 async def api_search_universities(
     program: str | None = Query(None),
     subjects: str | None = Query(None),

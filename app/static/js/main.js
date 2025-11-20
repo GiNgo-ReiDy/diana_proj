@@ -1,35 +1,65 @@
-document.querySelector("#search-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const program = document.querySelector("#program").value;
-    const subjects = document.querySelector("#subjects").value;
-    const city = document.querySelector("#city").value;
-
-    const res = await fetch(`/api/universities?program=${encodeURIComponent(program)}&subjects=${encodeURIComponent(subjects)}&city=${encodeURIComponent(city)}`);
-    const data = await res.json();
-
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("#search-form");
     const resultsContainer = document.querySelector("#results");
-    resultsContainer.innerHTML = "";
+    const errorBox = document.querySelector("#error-box");
 
-    if (!data || data.length === 0) {
-        resultsContainer.innerHTML = "<p>Университеты не найдены</p>";
-        return;
-    }
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    const ul = document.createElement("ul");
-    data.forEach(u => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${u.name}</strong> (${u.country})`;
-        if (u.programs && u.programs.length > 0) {
-            const subUl = document.createElement("ul");
-            u.programs.forEach(p => {
-                const subLi = document.createElement("li");
-                subLi.textContent = `Программа: ${p.name}, Предметы: ${p.required_subjects}`;
-                subUl.appendChild(subLi);
+        // Считываем значения
+        const subjects = document.querySelector("#subjects").value.trim();
+        const city = document.querySelector("#city").value.trim();
+
+        // Очищаем область ошибок и результатов
+        errorBox.style.display = "none";
+        errorBox.textContent = "";
+        resultsContainer.innerHTML = "";
+
+        try {
+            // Формируем запрос
+            const url = `/api/universities/?subjects=${encodeURIComponent(subjects)}&city=${encodeURIComponent(city)}`;
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error("Ошибка сервера");
+            }
+
+            const data = await response.json();
+
+            // Если пусто
+            if (!data || data.length === 0) {
+                resultsContainer.innerHTML = "<p>Университеты не найдены</p>";
+                return;
+            }
+
+            // Рендер
+            const ul = document.createElement("ul");
+
+            data.forEach((u) => {
+                const li = document.createElement("li");
+                li.innerHTML = `<strong>${u.name}</strong> (${u.country || "страна не указана"})`;
+
+                if (u.programs && u.programs.length > 0) {
+                    const subUl = document.createElement("ul");
+
+                    u.programs.forEach((p) => {
+                        const subLi = document.createElement("li");
+                        subLi.textContent = `Программа: ${p.name}, Предметы: ${p.required_subjects}`;
+                        subUl.appendChild(subLi);
+                    });
+
+                    li.appendChild(subUl);
+                }
+
+                ul.appendChild(li);
             });
-            li.appendChild(subUl);
+
+            resultsContainer.appendChild(ul);
+
+        } catch (err) {
+            errorBox.style.display = "block";
+            errorBox.textContent = "Произошла ошибка при выполнении запроса";
         }
-        ul.appendChild(li);
     });
-    resultsContainer.appendChild(ul);
 });
