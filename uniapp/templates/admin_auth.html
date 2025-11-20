@@ -6,6 +6,7 @@
     <style>
         @import url("/static/css/admin_auth.css");
     </style>
+    <script src="/static/js/admin_auth.js" defer></script>
 </head>
 <body>
 
@@ -18,7 +19,7 @@
     </div>
     {% endif %}
 
-    <form method="post" action="/admin/login">
+    <form id="login-form">
         <label for="username">Логин:</label>
         <input type="text" id="username" name="username" required>
 
@@ -27,6 +28,7 @@
 
         <button type="submit">Войти</button>
     </form>
+
 </div>
 
 </body>
