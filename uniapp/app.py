@@ -13,15 +13,15 @@ from typing import List, Optional
 
 from sqlmodel import distinct
 
-from app.database import get_session
-from app.models import University, Program
-from app.api.data import router as data_router
+from uniapp.database import get_session
+from uniapp.models import University, Program
+from uniapp.api.data import router as data_router
 
-app =FastAPI()
+app = FastAPI()
 logger = getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent.parent  # путь к проекту
-TEMPLATES_DIR = BASE_DIR / "app" / "templates"
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+TEMPLATES_DIR = BASE_DIR / "uniapp" / "templates"
+app.mount("/static", StaticFiles(directory="uniapp/static"), name="static")
 
 # Настройка шаблонов
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, func, delete
-from app.models import University, Program
+from uniapp.models import University, Program
 from typing import List, Optional
 import logging
 

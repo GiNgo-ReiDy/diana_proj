@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-DATABASE_URL = "postgresql+asyncpg://user:password@localhost:5432/universities.db"
+DATABASE_URL = "postgresql+asyncpg://uniuser:1234@localhost:5432/universities"
 #потом видимо вместо юзера и пасворда что-то подставим
 
 engine = create_async_engine(

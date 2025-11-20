@@ -1,18 +1,21 @@
 from fastapi import APIRouter, Query, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.crud import get_university
-from app.database import get_session
+from uniapp.crud import get_university
+from uniapp.database import get_session
 
 router = APIRouter()  # ← именно router, а не функция
 
-@router.get("/")
+@router.get("")
 async def api_search_universities(
-    program: str | None = Query(None),
     subjects: str | None = Query(None),
     city: str | None = Query(None),
     session: AsyncSession = Depends(get_session)
 ):
-    universities = await get_university(session, program=program, subjects=subjects, city=city)
+    universities = await get_university(
+        session,
+        subjects=[subjects] if subjects else None,
+        cities=[city] if city else None,
+    )
     return [
         {
             "id": u.id,
