@@ -63,3 +63,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+let subjectsLabel = document.querySelector(".subjects-label")
+let subjectList = document.querySelector(".subject-list")
+
+function toggleSubjects(e){
+    e.preventDefault();
+    subjectList.classList.toggle("hidden");
+}
+
+document.querySelector(".btn-dropdown").addEventListener("click", toggleSubjects);
+
+document.querySelectorAll("input[type='checkbox']").forEach(function (checkbox){
+    checkbox.addEventListener("change", updateSelectedSubjects);
+});
+
+function updateSelectedSubjects(){
+    let selectedSubjects = [];
+    document.querySelectorAll("input[type='checkbox']:checked").forEach(function (checkbox){
+        selectedSubjects.push(checkbox.value)
+    });
+    if(selectedSubjects.length > 0){
+        subjectsLabel.innerText = selectedSubjects.join(", ");
+    } else{
+        subjectsLabel.innerText = "Предметы";
+    }
+
+}
+

@@ -22,17 +22,27 @@
         <h1>Поиск университетов</h1>
 
         <form id="search-form">
-<!--            <label for="program">Программа:</label>-->
-<!--            <input type="text" id="program" name="program">-->
+            <div class="subjects-container">
+                <span class="subjects-label">Предметы</span>
+                <button class="btn-dropdown" onclick="toggleSubjects(event)">Открыть список</button>
+                <ul class="subject-list hidden">
+                    <li><input type="checkbox" id="biology" name="subjects[]" value="Биология"><label for="biology">Биология</label></li>
+                    <li><input type="checkbox" id="geography" name="subjects[]" value="География"><label for="geography">География</label></li>
+                    <li><input type="checkbox" id="history" name="subjects[]" value="История"><label for="history">История</label></li>
+                    <li><input type="checkbox" id="computer_science" name="subjects[]" value="Информатика и ИКТ"><label for="computer_science">Информатика и ИКТ</label></li>
+                    <li><input type="checkbox" id="foreign_lang" name="subjects[]" value="Иностранные языки"><label for="foreign_lang">Иностранные языки</label></li>
+                    <li><input type="checkbox" id="literature" name="subjects[]" value="Литература"><label for="literature">Литература</label></li>
+                    <li><input type="checkbox" id="social_science" name="subjects[]" value="Обществознание"><label for="social_science">Обществознание</label></li>
+                    <li><input type="checkbox" id="russian" name="subjects[]" value="Русский язык"><label for="russian">Русский язык</label></li>
+                    <li><input type="checkbox" id="math" name="subjects[]" value="Профильная математика"><label for="math">Профильная математика</label></li>
+                    <li><input type="checkbox" id="physics" name="subjects[]" value="Физика"><label for="physics">Физика</label></li>
+                    <li><input type="checkbox" id="chemistry" name="subjects[]" value="Химия"><label for="chemistry">Химия</label></li>
 
-            <label for="subjects">Предметы:</label>
-            <input type="text" id="subjects" name="subjects">
-
-            <label for="city">Город академической мобильности:</label>
-            <input type="text" id="city" name="city">
-
+                </ul>
+            </div>
             <button type="submit">Искать</button>
         </form>
+
 
         <div class="error-box" id="error-box" style="display: none;"></div>
     </div>
