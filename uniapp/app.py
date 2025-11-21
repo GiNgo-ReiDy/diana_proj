@@ -16,6 +16,7 @@ from sqlmodel import distinct
 from uniapp.database import get_session
 from uniapp.models import University, Program
 from uniapp.api.data import router as data_router
+from uniapp.api.auth import router as auth_router
 
 app = FastAPI()
 logger = getLogger(__name__)
@@ -26,7 +27,8 @@ app.mount("/static", StaticFiles(directory="uniapp/static"), name="static")
 # Настройка шаблонов
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
-app.include_router(data_router, prefix="/api/universities", tags=["data"])
+app.include_router(data_router, prefix="/api", tags=["data"])
+app.include_router(auth_router, prefix="/api", tags=["auth"])
 
 @app.get("/", response_class=HTMLResponse)
 async def search_universities(
