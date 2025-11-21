@@ -1,24 +1,20 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
-class UniversityBase(BaseModel):
-    name: str
-    cities: Optional[List[str]] = None
-
-class University(UniversityBase):
+class Program(BaseModel):
     id: int
-    programs: List['Program'] = []
+    name: str
+    required_subjects: list[str]
 
     class Config:
         from_attributes = True
 
-class ProgramBase(BaseModel):
-    name: str
-    required_subjects: List[str] = []
 
-class Program(ProgramBase):
+class University(BaseModel):
     id: int
-    university: University
+    name: str
+    cities: list[str]
+    programs: list[Program] = []
 
     class Config:
         from_attributes = True

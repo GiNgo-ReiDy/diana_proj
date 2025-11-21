@@ -5,22 +5,20 @@ from sqlalchemy.dialects.postgresql import ARRAY
 class Base(DeclarativeBase):
     pass
 
-class University(Base):
-    __tablename__ = 'university'
+class UniversityDB(Base):
+    __tablename__ = "university"
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String)
+    cities = mapped_column(ARRAY(Text))
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String)
-    cities: Mapped[list] = mapped_column(ARRAY(Text))
+    programs = relationship("ProgramDB", back_populates="university")
 
-    programs = relationship("Program", back_populates="university")
 
-class Program(Base):
-    __tablename__ = 'program'
+class ProgramDB(Base):
+    __tablename__ = "program"
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String)
+    required_subjects = mapped_column(ARRAY(Text))
+    university_id = mapped_column(ForeignKey("university.id"))
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String)
-    university_id: Mapped[int] = mapped_column(Integer, ForeignKey('university.id'))
-    required_subjects: Mapped[list] = mapped_column(ARRAY(Text))
-
-    university = relationship("University", back_populates="programs")
-
+    university = relationship("UniversityDB", back_populates="programs")

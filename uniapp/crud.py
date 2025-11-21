@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, func, delete
-from uniapp.models import University, Program
+from uniapp.models import UniversityDB, ProgramDB
 from typing import List, Optional
 import logging
 
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 async def get_universities(db: AsyncSession, skip: int = 0, limit: int = 100):
     try:
-        stmt = select(University).options(selectinload(University.programs)).offset(skip).limit(limit)
+        stmt = select(UniversityDB).options(selectinload(UniversityDB.programs)).offset(skip).limit(limit)
         result = await db.execute(stmt)
         return result.scalars().all()
     except Exception as e:
@@ -19,7 +19,7 @@ async def get_universities(db: AsyncSession, skip: int = 0, limit: int = 100):
 
 async def get_university(db: AsyncSession, subjects: Optional[List[str]] = None, cities: Optional[List[str]] = None):
     try:
-        stmt = select(University).options(selectinload(University.programs))
+        stmt = select(UniversityDB).options(selectinload(UniversityDB.programs))
 
         if not subjects and not cities:
             result = await db.execute(stmt)
@@ -28,8 +28,8 @@ async def get_university(db: AsyncSession, subjects: Optional[List[str]] = None,
         university_ids = None
 
         if subjects:
-            subjects_stmt = select(Program.university_id).where(
-                func.array_to_string(Program.required_subjects, ',').ilike(f"%{subjects}%")
+            subjects_stmt = select(ProgramDB.university_id).where(
+                func.array_to_string(ProgramDB.required_subjects, ',').ilike(f"%{subjects}%")
             ).distinct()
             result = await db.execute(subjects_stmt)
             subjects_ids = {row[0] for row in result.all() if row[0]}
@@ -37,8 +37,8 @@ async def get_university(db: AsyncSession, subjects: Optional[List[str]] = None,
 
         if cities:
             # Проверяем города в массиве cities университета
-            city_stmt = select(University.id).where(
-                func.array_to_string(University.cities, ',').ilike(f"%{cities}%")
+            city_stmt = select(UniversityDB.id).where(
+                func.array_to_string(UniversityDB.cities, ',').ilike(f"%{cities}%")
             )
             result = await db.execute(city_stmt)
             city_ids = {row[0] for row in result.all() if row[0]}
@@ -48,7 +48,7 @@ async def get_university(db: AsyncSession, subjects: Optional[List[str]] = None,
             return []
 
         if university_ids is not None:
-            stmt = stmt.where(University.id.in_(list(university_ids)))
+            stmt = stmt.where(UniversityDB.id.in_(list(university_ids)))
 
         result = await db.execute(stmt)
         return result.scalars().all()
@@ -59,7 +59,7 @@ async def get_university(db: AsyncSession, subjects: Optional[List[str]] = None,
 
 async def add_university(db: AsyncSession, name: str, cities: Optional[List[str]] = None):
     try:
-        db_university = University(name=name, cities=cities or [])
+        db_university = UniversityDB(name=name, cities=cities or [])
         db.add(db_university)
         await db.commit()
         await db.refresh(db_university)
@@ -71,7 +71,7 @@ async def add_university(db: AsyncSession, name: str, cities: Optional[List[str]
 
 async def delete_university(db: AsyncSession, university_id: int):
     try:
-        stmt = delete(University).where(University.id == university_id)
+        stmt = delete(UniversityDB).where(UniversityDB.id == university_id)
         result = await db.execute(stmt)
         await db.commit()
         return result.rowcount > 0
@@ -82,7 +82,7 @@ async def delete_university(db: AsyncSession, university_id: int):
 
 async def update_university(db: AsyncSession, university_id: int, name: str = None, cities: Optional[List[str]] = None):
     try:
-        stmt = select(University).where(University.id == university_id)
+        stmt = select(UniversityDB).where(UniversityDB.id == university_id)
         result = await db.execute(stmt)
         db_university = result.scalar_one_or_none()
         if db_university:
@@ -101,7 +101,7 @@ async def update_university(db: AsyncSession, university_id: int, name: str = No
 
 async def get_university_by_id(db: AsyncSession, university_id: int):
     try:
-        stmt = select(University).options(selectinload(University.programs)).where(University.id == university_id)
+        stmt = select(UniversityDB).options(selectinload(UniversityDB.programs)).where(UniversityDB.id == university_id)
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
     except Exception as e:

@@ -14,7 +14,7 @@ from typing import List, Optional
 from sqlmodel import distinct
 
 from uniapp.database import get_session
-from uniapp.models import University, Program
+from uniapp.models import UniversityDB, ProgramDB
 from uniapp.api.data import router as data_router
 from uniapp.api.auth import router as auth_router
 
