@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
         resultsContainer.innerHTML = "";
 
         try {
-            // Формируем запрос
-            const url = `/api/get_universities/?subjects=${encodeURIComponent(subjects)}&city=${encodeURIComponent(city)}`;
+            // Формируем запроuniс
+            const url = `/api/universities/get_universities/?subjects=${encodeURIComponent(subjects)}&city=${encodeURIComponent(city)}`;
 
             const response = await fetch(url);
 

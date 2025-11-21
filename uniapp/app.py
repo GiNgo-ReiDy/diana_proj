@@ -27,7 +27,7 @@ app.mount("/static", StaticFiles(directory="uniapp/static"), name="static")
 # Настройка шаблонов
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
-app.include_router(data_router, prefix="/api", tags=["data"])
+app.include_router(data_router, prefix="/api/universities", tags=["data"])
 app.include_router(auth_router, prefix="/api", tags=["auth"])
 
 @app.get("/", response_class=HTMLResponse)
@@ -42,31 +42,31 @@ async def search_universities(
     logger.info(f"Запрос получен: subjects={subjects}, city={cities}")
     try:
         # Используем асинхронный запрос к базе данных
-        stmt = select(University).options(selectinload(University.programs))
+        stmt = select(UniversityDB).options(selectinload(UniversityDB.programs))
 
         university_ids = set()
         if subjects or cities:
 
             if subjects:
                 conditions = [
-                    Program.required_subjects.contains(subject) for subject in subjects
+                    ProgramDB.required_subjects.contains(subject) for subject in subjects
                 ]
-                subjects_stmt = select(distinct(Program.university_id)).filter(*conditions)
+                subjects_stmt = select(distinct(ProgramDB.university_id)).filter(*conditions)
                 result = await session.execute(subjects_stmt)
                 subjects_ids = {row[0] for row in result.all()}
                 university_ids.update(subjects_ids)
 
             if cities:
                 city_conditions = [
-                    func.array_to_string(University.cities, ',').ilike(f"%{city}%" for city in cities)
+                    func.array_to_string(UniversityDB.cities, ',').ilike(f"%{city}%" for city in cities)
                 ]
-                city_stmt = select(University.id).where(or_(*city_conditions))
+                city_stmt = select(UniversityDB.id).where(or_(*city_conditions))
                 result = await session.execute(city_stmt)
                 city_ids = {row[0] for row in result.all()}
                 university_ids.update(city_ids)
 
             if university_ids:
-                stmt = stmt.where(University.id.in_(list(university_ids)))
+                stmt = stmt.where(UniversityDB.id.in_(list(university_ids)))
                 result = await session.execute(stmt)
                 universities = result.scalars().all()
             else:
