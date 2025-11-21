@@ -59,7 +59,7 @@ function renderTable(universities) {
  * Переход к редактированию
  */
 function editUniversity(id) {
-    window.location.href = `/admin/universities/${id}/edit`;
+    window.location.href = `/api/universities/update/${id}`;
 }
 
 /**
