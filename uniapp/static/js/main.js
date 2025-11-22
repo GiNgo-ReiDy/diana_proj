@@ -65,11 +65,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let subjectsLabel = document.querySelector(".subjects-label")
-let subjectList = document.querySelector(".subject-list")
 
-function toggleSubjects(e){
-    e.preventDefault();
-    subjectList.classList.toggle("hidden");
+
+function toggleSubjects(event){
+    event.preventDefault();
+    console.log('Нажата кнопка');
+    const form = document.getElementById('search-form');
+    const subjectList = form.querySelector('.subject-list');
+
+    if (subjectList.classList.contains('hidden')){
+        subjectList.classList.remove('hidden');
+    }else{
+        subjectList.classList.add('hidden');
+    }
 }
 
 document.querySelector(".btn-dropdown").addEventListener("click", toggleSubjects);

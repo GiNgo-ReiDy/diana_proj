@@ -131,8 +131,3 @@ li {
 .hidden {
     display: none;
 }
-
-.subject-list{
-    list-style-type: none;
-    padding: 0;
-}
