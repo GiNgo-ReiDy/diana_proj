@@ -131,3 +131,13 @@ li {
 .hidden {
     display: none;
 }
+
+.subject-list li {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.cities-list li {
+    list-style-type: none;
+    padding-left: 0;
+}
