@@ -58,8 +58,75 @@ function renderTable(universities) {
 /**
  * Переход к редактированию
  */
-function editUniversity(id) {
-    window.location.href = `/api/universities/update/${id}`;
+function openModal(id) {
+    // window.location.href = `/api/universities/update/${id}`;
+    createModalWindow(id);
+}
+
+function createModalWindow(universityID){
+    const modalContainer = document.createElement('div')
+    modalContainer.className = 'modal-container';
+
+    modalContainer.innerHTML = `
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">x</span>
+            <h2>Редактирование университета</h2>
+            <form id="editForm">
+                <label for="uniName">Название университета:</label><br />
+                <input type="text" id="uniName" required /><br /><br />
+
+                <label for="uniCities">Города:</label><br />
+                <textarea id="uniCities" rows="4" cols="50"></textarea><br /><br />
+
+                <button type="button" onclick="saveEditedUniversity(${universityID})">Сохранить изменения</button>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modalContainer);
+
+    // Устанавливаем фокус на первое поле
+    document.getElementById('uniName').focus();
+}
+
+function closeModal() {
+    document.body.removeChild(document.querySelector('.modal-container'));
+}
+
+async function saveEditedUniversity(universityID) {
+    const name = document.getElementById('uniName').value.trim();
+    const cities = document.getElementById('uniCities').value.split(',')
+                            .map(c => c.trim())
+                            .filter(Boolean); // Фильтрация пустых строк
+
+    if (!name) {
+        alert("Нужно указать название университета.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/universities/update/${universityID}`, {
+            method: 'PATCH', // Используем метод PATCH для частичного обновления
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ // Только изменённые данные
+                name,
+                cities
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Ошибка при обновлении университета");
+        }
+
+        alert("Университет успешно обновлён.");
+        closeModal(); // Закрываем окно после успешного сохранения
+        reloadTable(); // Можно вызвать функцию для обновления таблицы на странице
+    } catch (err) {
+        console.error(err);
+        alert("Ошибка сервера при обновлении университета");
+    }
 }
 
 /**
