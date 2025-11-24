@@ -98,3 +98,51 @@ th {
     cursor: pointer;
 }
 
+.floating-home-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  color: #ffffff;
+  background: #007bff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  z-index: 9999;
+  transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.floating-home-btn:hover {
+  transform: translateY(-3px);
+  background: #0063d1;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+}
+
+.floating-home-btn:active {
+  transform: translateY(0);
+}
+
+/* Небольшой доступный фокус (для клавиатуры) */
+.floating-home-btn:focus {
+  outline: 3px solid rgba(0, 123, 255, 0.25);
+  outline-offset: 2px;
+}
+
+/* Маленькая версия для узких экранов */
+@media (max-width: 480px) {
+  .floating-home-btn {
+    bottom: 14px;
+    left: 14px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 9px;
+  }
+}

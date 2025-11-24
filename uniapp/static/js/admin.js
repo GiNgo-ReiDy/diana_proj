@@ -8,6 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
     addBtn.addEventListener("click", showAddForm);
 });
 
+async function editUniversity(id) {
+    openModal(id);
+}
+
 /**
  * Загружает список университетов с API
  */
@@ -41,8 +45,7 @@ function renderTable(universities) {
         tr.innerHTML = `
             <td>${u.id}</td>
             <td>${u.name}</td>
-            <td>${u.cities?.[0] || ""}</td>
-            <td>${u.cities?.[1] || ""}</td>
+            <td>${u.cities}</td>
             <td>${u.programs.map(p => p.required_subjects.join(", ")).join("<br>")}</td>
             <td>${u.programs.map(p => p.name).join("<br>")}</td>
             <td class="actions">
@@ -106,7 +109,7 @@ async function saveEditedUniversity(universityID) {
 
     try {
         const response = await fetch(`/api/universities/update/${universityID}`, {
-            method: 'PATCH', // Используем метод PATCH для частичного обновления
+            method: 'PUT', // Используем метод PATCH для частичного обновления
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -127,6 +130,8 @@ async function saveEditedUniversity(universityID) {
         console.error(err);
         alert("Ошибка сервера при обновлении университета");
     }
+    // Обновляем страницу с текущими данными университета
+    await loadUniversities();
 }
 
 /**

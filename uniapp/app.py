@@ -114,11 +114,4 @@ async def admin_panel(request: Request):
 async def admin_auth_panel(request: Request):
     return templates.TemplateResponse("admin_auth.html", {"request": request})
 
-@data_router.patch("/update/{id}")
-async def update_universities(id:int, data:dict, db: Session = Depends(get_session)):
-    try:
-        updated_university = await update_university(db, id, data.get('name'), data.get('cities'))
-        return {'message': 'Университет успешно обновлен'}
-    except Exception as e:
-        return {'error': str(e)}
 

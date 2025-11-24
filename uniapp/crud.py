@@ -82,22 +82,31 @@ async def delete_university(db: AsyncSession, university_id: int):
 
 async def update_university(db: AsyncSession, university_id: int, name: str = None, cities: Optional[List[str]] = None):
     try:
-        stmt = select(UniversityDB).where(UniversityDB.id == university_id)
+        stmt = (
+            select(UniversityDB)
+            .options(selectinload(UniversityDB.programs))
+            .where(UniversityDB.id == university_id)
+        )
         result = await db.execute(stmt)
         db_university = result.scalar_one_or_none()
+
         if db_university:
             if name:
                 db_university.name = name
             if cities is not None:
                 db_university.cities = cities
+
             await db.commit()
             await db.refresh(db_university)
             return db_university
+
         return None
+
     except Exception as e:
         await db.rollback()
         logger.error(f"Ошибка в update_university: {e}", exc_info=True)
         raise
+
 
 async def get_university_by_id(db: AsyncSession, university_id: int):
     try:

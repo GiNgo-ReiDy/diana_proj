@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Поиск университетов</title>
     <link rel="stylesheet" href="/static/css/main.css">
-    <script src="/static/js/main.js" defer></script>
 </head>
+
 <body>
 
 <header>
@@ -14,72 +14,71 @@
 
 <nav>
     <a href="/">Главная</a>
-    <a href="/">Поиск</a>
+    <a href="/admin_auth">Админ</a>
 </nav>
 
 <main>
-    <div class="container-form">
+
+    <div class="search-panel">
         <h1>Поиск университетов</h1>
 
+        <!-- Переключатель стран -->
+        <div class="country-switch">
+            <label class="switch">
+                <input type="checkbox" id="country-toggle">
+                <span class="slider"></span>
+            </label>
+            <span id="country-label">КНР</span>
+        </div>
+
         <form id="search-form">
-            <div class="subjects-container">
-                <span class="subjects-label">Предметы</span>
-                <button class="btn-dropdown subjects-btn">Открыть список</button>
-                <ul class="subject-list hidden">
-                    <li><input type="checkbox" id="biology" name="subjects[]" value="Биология"><label for="biology">Биология</label></li>
-                    <li><input type="checkbox" id="geography" name="subjects[]" value="География"><label for="geography">География</label></li>
-                    <li><input type="checkbox" id="history" name="subjects[]" value="История"><label for="history">История</label></li>
-                    <li><input type="checkbox" id="computer_science" name="subjects[]" value="Информатика и ИКТ"><label for="computer_science">Информатика и ИКТ</label></li>
-                    <li><input type="checkbox" id="foreign_lang" name="subjects[]" value="Иностранные языки"><label for="foreign_lang">Иностранные языки</label></li>
-                    <li><input type="checkbox" id="literature" name="subjects[]" value="Литература"><label for="literature">Литература</label></li>
-                    <li><input type="checkbox" id="social_science" name="subjects[]" value="Обществознание"><label for="social_science">Обществознание</label></li>
-                    <li><input type="checkbox" id="russian" name="subjects[]" value="Русский язык"><label for="russian">Русский язык</label></li>
-                    <li><input type="checkbox" id="math" name="subjects[]" value="Профильная математика"><label for="math">Профильная математика</label></li>
-                    <li><input type="checkbox" id="physics" name="subjects[]" value="Физика"><label for="physics">Физика</label></li>
-                    <li><input type="checkbox" id="chemistry" name="subjects[]" value="Химия"><label for="chemistry">Химия</label></li>
 
+            <!-- Предметы -->
+            <div class="dropdown-block">
+                <div class="dropdown-header">
+                    <span class="label subjects-label">Предметы</span>
+                    <button class="btn-dropdown subjects-btn">▼</button>
+                </div>
+                <ul class="dropdown-list subject-list hidden">
+                    <li><label><input type="checkbox" value="Биология"> Биология</label></li>
+                    <li><label><input type="checkbox" value="География"> География</label></li>
+                    <li><label><input type="checkbox" value="История"> История</label></li>
+                    <li><label><input type="checkbox" value="Информатика и ИКТ"> Информатика и ИКТ</label></li>
+                    <li><label><input type="checkbox" value="Иностранные языки"> Иностранные языки</label></li>
+                    <li><label><input type="checkbox" value="Литература"> Литература</label></li>
+                    <li><label><input type="checkbox" value="Обществознание"> Обществознание</label></li>
+                    <li><label><input type="checkbox" value="Русский язык"> Русский язык</label></li>
+                    <li><label><input type="checkbox" value="Профильная математика"> Профильная математика</label></li>
+                    <li><label><input type="checkbox" value="Физика"> Физика</label></li>
+                    <li><label><input type="checkbox" value="Химия"> Химия</label></li>
                 </ul>
             </div>
 
-            <div class="cities-container">
-                <span class="cities-label">Предметы</span>
-                <button class="btn-dropdown cities-btn">Открыть список</button>
-                <ul class="cities-list hidden">
-                    <li><input type="checkbox" id="sichuan" name="cities[]" value="Сычуань"><label for="sichuan">Сычуань</label></li>
-                    <li><input type="checkbox" id="beijing" name="cities[]" value="Пекин"><label for="beijing">Пекин</label></li>
-                    <li><input type="checkbox" id="harbin" name="cities[]" value="Харбин"><label for="harbin">Харбин</label></li>
-                    <li><input type="checkbox" id="hsinchu" name="cities[]" value="Синьчжу"><label for="hsinchu">Синьчжу</label></li>
-                    <li><input type="checkbox" id="shanghai" name="cities[]" value="Шанхай"><label for="shanghai">Шанхай</label></li>
-                    <li><input type="checkbox" id="tianjin" name="cities[]" value="Тяньцзинь"><label for="tianjin">Тяньцзинь</label></li>
-                    <li><input type="checkbox" id="wuhan" name="cities[]" value="Ухань"><label for="wuhan">Ухань</label></li>
-                    <li><input type="checkbox" id="chongqing" name="cities[]" value="Чунцин"><label for="chongqing">Чунцин</label></li>
-                    <li><input type="checkbox" id="guaxi" name="cities[]" value="Гуанси"><label for="guaxi">Гуанси</label></li>
-                    <li><input type="checkbox" id="xian" name="cities[]" value="Сиань"><label for="xian">Сиань</label></li>
-                    <li><input type="checkbox" id="heilongjiang" name="cities[]" value="Хейлунцзян"><label for="heilongjiang">Хейлунцзян</label></li>
-                    <li><input type="checkbox" id="guangzhou" name="cities[]" value="Гуанчжоу"><label for="guangzhou">Гуанчжоу</label></li>
-                    <li><input type="checkbox" id="hongkong" name="cities[]" value="Гонконг"><label for="hongkong">Гонконг</label></li>
-                    <li><input type="checkbox" id="shenzhen" name="cities[]" value="Шэньчжэнь"><label for="shenzhen">Шэньчжэнь</label></li>
-                    <li><input type="checkbox" id="nanking" name="cities[]" value="Нанкин"><label for="nanking">Нанкин</label></li>
-                    <li><input type="checkbox" id="hunan" name="cities[]" value="Хунань"><label for="hunan">Хунань</label></li>
-                    <li><input type="checkbox" id="dalian" name="cities[]" value="Далянь"><label for="dalian">Далянь</label></li>
-                    <li><input type="checkbox" id="nanchang" name="cities[]" value="Наньчан"><label for="nanchang">Наньчан</label></li>
-                    <li><input type="checkbox" id="shandong" name="cities[]" value="Шаньдунь"><label for="shandong">Шаньдунь</label></li>
-                    <li><input type="checkbox" id="changchun" name="cities[]" value="Чанчунь"><label for="changchun">Чанчунь</label></li>
-                    <li><input type="checkbox" id="liaoning" name="cities[]" value="Ляонин"><label for="liaoning">Ляонин</label></li>
+            <!-- Города -->
+            <div class="dropdown-block">
+                <div class="dropdown-header">
+                    <span class="label cities-label">Города</span>
+                    <button class="btn-dropdown cities-btn">▼</button>
+                </div>
+                <ul class="dropdown-list cities-list hidden">
+                    <!-- Сюда JS вставит города -->
                 </ul>
             </div>
-            <button type="submit">Искать</button>
+
+            <button type="submit" class="btn-search">Искать</button>
+
         </form>
 
-
-        <div class="error-box" id="error-box" style="display: none;"></div>
+        <div class="error-box" id="error-box"></div>
     </div>
 
-    <div class="container-results">
-        <h2>Результаты поиска:</h2>
+    <div class="results-panel">
+        <h2>Результаты поиска</h2>
         <div id="results"></div>
     </div>
+
 </main>
 
+<script src="/static/js/main.js" defer></script>
 </body>
 </html>

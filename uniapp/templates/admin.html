@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Админка — Университеты</title>
-    <style>
-        @import url("/static/css/admin.css");
-    </style>
+
+    <!-- Основные стили админки -->
+    <link rel="stylesheet" href="/static/css/admin.css">
+
+    <!-- Стили плавающей кнопки -->
+    <link rel="stylesheet" href="/static/css/floating-home.css">
 </head>
+
 <body>
 
 <h1>Администрирование университетов</h1>
@@ -18,28 +22,30 @@
         <input type="text" placeholder="Поиск..." id="searchInput">
     </div>
 </div>
-<button onclick="openModal()">Редактировать университет</button>
 
 <div id="error-box" style="display:none;color:red;margin:10px 0;"></div>
 
 <table id="uniTable">
     <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Город 1</th>
-            <th>Город 2</th>
-            <th>Предметы</th>
-            <th>Программа</th>
-            <th>Действия</th>
-        </tr>
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Города</th>
+        <th>Предметы</th>
+        <th>Программа</th>
+        <th>Действия</th>
+    </tr>
     </thead>
     <tbody>
-        <!-- Здесь JS будет динамически рендерить строки -->
+        <!-- JS рендерит строки -->
     </tbody>
 </table>
 
+<!-- JS для работы админки -->
 <script src="/static/js/admin.js"></script>
+
+<!-- JS, который автоматически создаёт плавающую кнопку -->
+<script src="/static/js/floating-home.js" defer></script>
 
 </body>
 </html>
