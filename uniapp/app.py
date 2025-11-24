@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, Session
 from pathlib import Path
 from logging import getLogger
 from typing import List, Optional
@@ -17,6 +17,7 @@ from uniapp.database import get_session
 from uniapp.models import UniversityDB, ProgramDB
 from uniapp.api.data import router as data_router
 from uniapp.api.auth import router as auth_router
+from uniapp.crud import update_university
 
 app = FastAPI()
 logger = getLogger(__name__)
@@ -112,4 +113,12 @@ async def admin_panel(request: Request):
 @app.get("/admin_auth", response_class=HTMLResponse)
 async def admin_auth_panel(request: Request):
     return templates.TemplateResponse("admin_auth.html", {"request": request})
+
+@data_router.patch("/update/{id}")
+async def update_universities(id:int, data:dict, db: Session = Depends(get_session)):
+    try:
+        updated_university = await update_university(db, id, data.get('name'), data.get('cities'))
+        return {'message': 'Университет успешно обновлен'}
+    except Exception as e:
+        return {'error': str(e)}
 
