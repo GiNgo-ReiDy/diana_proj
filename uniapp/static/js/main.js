@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             data.forEach(u => {
                 const li = document.createElement("li");
-                li.innerHTML = `<strong>${u.name}</strong> (${u.country || "страна не указана"})`;
+                li.innerHTML = `<strong>${u.name}</strong>`;
 
                 if (u.programs && u.programs.length > 0) {
                     const subUl = document.createElement("ul");
