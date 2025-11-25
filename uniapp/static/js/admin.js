@@ -97,24 +97,22 @@ function closeModal() {
 }
 
 async function saveEditedUniversity(universityID) {
-    const name = document.getElementById('uniName').value.trim();
     const cities = document.getElementById('uniCities').value.split(',')
                             .map(c => c.trim())
                             .filter(Boolean); // Фильтрация пустых строк
 
-    if (!name) {
-        alert("Нужно указать название университета.");
+    if (!cities.length) {
+        alert("Нужно указать хотя бы один город.");
         return;
     }
 
     try {
         const response = await fetch(`/api/universities/update/${universityID}`, {
-            method: 'PUT', // Используем метод PATCH для частичного обновления
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ // Только изменённые данные
-                name,
                 cities
             })
         });
@@ -123,7 +121,7 @@ async function saveEditedUniversity(universityID) {
             throw new Error("Ошибка при обновлении университета");
         }
 
-        alert("Университет успешно обновлён.");
+        alert("Список городов успешно обновлён.");
         closeModal(); // Закрываем окно после успешного сохранения
         // Можно вызвать функцию для обновления таблицы на странице
     } catch (err) {
