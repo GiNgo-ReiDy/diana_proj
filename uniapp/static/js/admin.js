@@ -46,8 +46,7 @@ function renderTable(universities) {
             <td>${u.id}</td>
             <td>${u.name}</td>
             <td>${u.cities}</td>
-            <td>${u.programs.map(p => p.required_subjects.join(", ")).join("<br>")}</td>
-            <td>${u.programs.map(p => p.name).join("<br>")}</td>
+            
             <td class="actions">
                 <button class="edit-btn" onclick="editUniversity(${u.id})">Редактировать</button>
                 <button class="delete-btn" onclick="deleteUniversity(${u.id})">Удалить</button>
@@ -75,7 +74,7 @@ function createModalWindow(universityID){
             <span class="close-btn" onclick="closeModal()">x</span>
             <h2>Редактирование университета</h2>
             <form id="editForm">
-            
+
                 <label for="uniCities">Города:</label><br />
                 <textarea id="uniCities" rows="4" cols="50"></textarea><br /><br />
 
@@ -219,5 +218,125 @@ async function addUniversity() {
     } catch (err) {
         console.error(err);
         alert("Ошибка сервера при добавлении университета");
+    }
+}
+
+//////Функции для таблиц с программами, написаны ночью, ПЕРЕПРОВЕРИТЬ!
+async function loadProgram() {
+    try {
+        const response = await fetch("/api/program/all");
+
+        if (!response.ok) {
+            throw new Error("Ошибка загрузки данных");
+        }
+
+        const program = await response.json();
+        renderTablePr(program);
+
+    } catch (err) {
+        console.error(err);
+        alert("Ошибка при загрузке списка университетов");
+    }
+}
+function renderTablePr(program) {
+    const tbody = document.querySelector("#programTable tbody");
+    tbody.innerHTML = "";
+
+    program.forEach(p => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${p.id}</td>
+            <td>${p.name}</td>
+            <td>${p.required_subjects}</td>
+            <td>${p.university_id}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+async function deleteProgram(id) {
+    if (!confirm("Удалить программу?")) return;
+
+    try {
+        const response = await fetch(`/api/program/delete/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            throw new Error("Ошибка удаления");
+        }
+
+        alert("Удалено!");
+        loadProgram(); // Обновляем таблицу
+
+    } catch (err) {
+        console.error(err);
+        alert("Ошибка сервера");
+    }
+}
+
+function showAddFormPr() {
+    const formHtml = `
+        <div id="addFormContainer" style="margin: 20px 0;">
+            <input type="text" id="newPrName" placeholder="Название программы" required>
+            <input type="text" id="newPrSubjects" placeholder="Необходимые предметы(через запятую)">
+            <input type="text" id="newPrUniId" placeholder="ID вуза" required>
+            <button id="submitAdd">Добавить</button>
+            <button id="cancelAdd">Отмена</button>
+        </div>
+    `;
+    const container = document.createElement("div");
+    container.innerHTML = formHtml;
+    document.body.insertBefore(container, document.querySelector("#programTable"));
+
+    document.getElementById("submitAdd").addEventListener("click", addProgram);
+    document.getElementById("cancelAdd").addEventListener("click", () => {
+        container.remove();
+    });
+}
+
+/**
+ * Добавление нового университета через API
+ */
+async function addProgram() {
+    const name = document.getElementById("newPrName").value.trim();
+    const subjects = document.getElementById("newPrSubjects").value.split(",").map(c => c.trim()).filter(c => c);
+    const uniID = document.getElementById("newPrUniId").value.split(",").map(c => c.trim()).filter(c => c);
+
+
+    if (!name) {
+        alert("Название программы обязательно");
+        return;
+    }
+
+    if (!subjects) {
+        alert("Обязательно сдавать предметы");
+        return;
+    }
+    if (!uniID) {
+        alert("Программа обязательно должна быть привязана к вузу");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/universities/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, subjects, uniID })
+        });
+
+        if (!response.ok) {
+            throw new Error("Ошибка при добавлении программы");
+        }
+
+        alert("Программа добавлена!");
+        document.getElementById("addFormContainer").remove();
+        loadProgram(); // Обновляем таблицу
+
+    } catch (err) {
+        console.error(err);
+        alert("Ошибка сервера при добавлении программы");
     }
 }
