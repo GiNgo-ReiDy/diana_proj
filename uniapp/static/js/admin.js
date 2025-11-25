@@ -75,9 +75,7 @@ function createModalWindow(universityID){
             <span class="close-btn" onclick="closeModal()">x</span>
             <h2>Редактирование университета</h2>
             <form id="editForm">
-                <label for="uniName">Название университета:</label><br />
-                <input type="text" id="uniName" required /><br /><br />
-
+            
                 <label for="uniCities">Города:</label><br />
                 <textarea id="uniCities" rows="4" cols="50"></textarea><br /><br />
 
