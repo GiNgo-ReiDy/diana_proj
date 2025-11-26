@@ -50,3 +50,5 @@ async def api_del_program(
         raise HTTPException(status_code=404, detail="Program not found")
     return {"status": "success", "message": f"University with id {program_id} deleted."}
 
+
+

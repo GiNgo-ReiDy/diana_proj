@@ -239,7 +239,7 @@ async function loadProgram() {
 
     } catch (err) {
         console.error(err);
-        alert("Ошибка при загрузке списка университетов");
+        alert("Ошибка при загрузке списка программ");
     }
 }
 function renderTablePr(program) {
@@ -254,6 +254,11 @@ function renderTablePr(program) {
             <td>${p.name}</td>
             <td>${p.required_subjects}</td>
             <td>${p.university_id}</td>
+            
+            <td class="actions">
+                <button class="edit-btn" onclick="editProgram(${p.id})">Редактировать</button>
+                <button class="delete-btn" onclick="deleteProgram(${p.id})">Удалить</button>
+            </td>
         `;
 
         tbody.appendChild(tr);
@@ -285,7 +290,7 @@ function showAddFormPr() {
     const formHtml = `
         <div id="addFormContainer" style="margin: 20px 0;">
             <input type="text" id="newPrName" placeholder="Название программы" required>
-            <input type="text" id="newPrSubjects" placeholder="Необходимые предметы(через запятую)">
+            <input type="text" id="newPrSubjects" placeholder="Необходимые предметы(через запятую)" required>
             <input type="text" id="newPrUniId" placeholder="ID вуза" required>
             <button id="submitAdd">Добавить</button>
             <button id="cancelAdd">Отмена</button>
@@ -343,4 +348,85 @@ async function addProgram() {
         console.error(err);
         alert("Ошибка сервера при добавлении программы");
     }
+}
+
+async function editProgram(id) {
+    openModalProgram(id);
+}
+
+function openModalProgram(id) {
+    // window.location.href = `/api/universities/update/${id}`;
+    createModalWindowProgram(id);
+}
+
+function createModalWindowProgram(programID){
+    const modalContainer = document.createElement('div')
+    modalContainer.className = 'modal-container';
+
+    modalContainer.innerHTML = `
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModalProgram()">x</span>
+            <h2>Редактирование программы</h2>
+            <form id="editForm">
+
+                <label for="programSubjects">Предметы для сдачи:</label><br />
+                <textarea id="programSubjects" rows="2" cols="50"></textarea><br /><br />
+                <label for="programUni">ID университета:</label><br />
+                <textarea id="programUni" rows="2" cols="50"></textarea><br /><br />
+
+                <button type="button" onclick="saveEditedProgram(${programID})">Сохранить изменения</button>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modalContainer);
+
+    // // Устанавливаем фокус на первое поле
+    // document.getElementById('proName').focus();
+}
+
+function closeModalProgram() {
+    document.body.removeChild(document.querySelector('.modal-container'));
+}
+
+async function saveEditedProgram(programID) {
+    const required_subjects = document.getElementById('programSubjects').value.split(',')
+                            .map(c => c.trim())
+                            .filter(Boolean); // Фильтрация пустых строк
+    const university_id = document.getElementById('programUni').value.trim();
+
+    if (!required_subjects.length) {
+        alert("Нужно указать хотя бы один предмет.");
+        return;
+    }
+    if (!university_id.length) {
+        alert("Нужно указать хотя бы один вуз.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/program/update/${programID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ // Только изменённые данные
+                required_subjects,
+                university_id
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Ошибка при обновлении программы");
+        }
+
+        alert("Список программ успешно обновлён.");
+        closeModalProgram(); // Закрываем окно после успешного сохранения
+        // Можно вызвать функцию для обновления таблицы на странице
+    } catch (err) {
+        console.error(err);
+        alert("Ошибка сервера при обновлении программ");
+    }
+    // Обновляем страницу с текущими данными университета
+    await loadProgram();
 }

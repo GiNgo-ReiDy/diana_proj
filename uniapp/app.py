@@ -18,7 +18,6 @@ from uniapp.models import UniversityDB, ProgramDB
 from uniapp.api.data import router as data_router
 from uniapp.api.auth import router as auth_router
 from uniapp.api.program_data import router as program_router
-from uniapp.crud import update_university
 
 app = FastAPI()
 logger = getLogger(__name__)

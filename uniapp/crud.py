@@ -82,7 +82,10 @@ async def delete_university(db: AsyncSession, university_id: int):
         logger.error(f"Ошибка в delete_university: {e}", exc_info=True)
         raise
 
-async def update_university(db: AsyncSession, university_id: int, name: str = None, cities: Optional[List[str]] = None):
+async def update_university(db: AsyncSession,
+                            university_id: int,
+                            name: Optional[str] = None,
+                            cities: Optional[List[str]] = None):
     try:
         stmt = (
             select(UniversityDB)
@@ -96,7 +99,8 @@ async def update_university(db: AsyncSession, university_id: int, name: str = No
             if name:
                 db_university.name = name
             if cities is not None:
-                db_university.cities = cities
+                updated_cities = set(db_university.cities).union(set(cities))
+                db_university.cities = sorted(list(updated_cities))
 
             await db.commit()
             await db.refresh(db_university)
