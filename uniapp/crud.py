@@ -136,6 +136,13 @@ async def get_programs(db: AsyncSession, skip: int = 0, limit: int = 100):
 
 async def add_program(db: AsyncSession, name:str, subjects: List[str], uniid:int):
     try:
+        if not name.strip():
+            raise ValueError("Имя программы не может быть пустым.")
+        if len(subjects) == 0:
+            raise ValueError("Необходимо указать хотя бы один предмет.")
+        if uniid <= 0:
+            raise ValueError("Идентификатор университета должен быть положительным числом.")
+
         db_program = ProgramDB(name=name, required_subjects=subjects, university_id=uniid)
         db.add(db_program)
         await db.commit()

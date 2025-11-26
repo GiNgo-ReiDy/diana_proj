@@ -12,13 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     addProgramBtn.addEventListener("click", showAddFormPr);
 });
 
-async function editUniversity(id) {
-    openModal(id);
-}
 
-/**
- * Загружает список университетов с API
- */
+//Загружает список университетов
 async function loadUniversities() {
     try {
         const response = await fetch("/api/universities/all");
@@ -35,10 +30,30 @@ async function loadUniversities() {
         alert("Ошибка при загрузке списка университетов");
     }
 }
+/////
 
-/**
- * Рендер таблицы
- */
+
+//Загружает список программ
+async function loadProgram() {
+    try {
+        const response = await fetch("/api/program/all");
+
+        if (!response.ok) {
+            throw new Error("Ошибка загрузки данных");
+        }
+
+        const program = await response.json();
+        renderTablePr(program);
+
+    } catch (err) {
+        console.error(err);
+        alert("Ошибка при загрузке списка программ");
+    }
+}
+/////
+
+
+//Рендерит таблицу универов
 function renderTable(universities) {
     const tbody = document.querySelector("#uniTable tbody");
     tbody.innerHTML = "";
@@ -60,10 +75,40 @@ function renderTable(universities) {
         tbody.appendChild(tr);
     });
 }
+/////
 
-/**
- * Переход к редактированию
- */
+
+//Рендерит таблицу программ
+function renderTablePr(program) {
+    const tbody = document.querySelector("#programTable tbody");
+    tbody.innerHTML = "";
+
+    program.forEach(p => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${p.id}</td>
+            <td>${p.name}</td>
+            <td>${p.required_subjects}</td>
+            <td>${p.university_id}</td>
+            
+            <td class="actions">
+                <button class="edit-btn" onclick="editProgram(${p.id})">Редактировать</button>
+                <button class="delete-btn" onclick="deleteProgram(${p.id})">Удалить</button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+//////
+
+
+//Все, связанное с редактированием университетов
+async function editUniversity(id) {
+    openModal(id);
+}
+
 function openModal(id) {
     // window.location.href = `/api/universities/update/${id}`;
     createModalWindow(id);
@@ -90,7 +135,7 @@ function createModalWindow(universityID){
     document.body.appendChild(modalContainer);
 
     // Устанавливаем фокус на первое поле
-    document.getElementById('uniName').focus();
+    // document.getElementById('uniName').focus(); - у нас уже нет этого поля, думаю нет смысла в строчке
 }
 
 function closeModal() {
@@ -132,10 +177,96 @@ async function saveEditedUniversity(universityID) {
     // Обновляем страницу с текущими данными университета
     await loadUniversities();
 }
+/////
 
-/**
- * Удаление
- */
+
+
+//Все, что связано с редактированием программ: ЗАЧЕМ ОНО НАМ?
+// async function editProgram(id) {
+//     openModalProgram(id);
+// }
+//
+// function openModalProgram(id) {
+//     // window.location.href = `/api/universities/update/${id}`;
+//     createModalWindowProgram(id);
+// }
+//
+// function createModalWindowProgram(programID){
+//     const modalContainer = document.createElement('div')
+//     modalContainer.className = 'modal-container';
+//
+//     modalContainer.innerHTML = `
+//         <div class="modal-content">
+//             <span class="close-btn" onclick="closeModalProgram()">x</span>
+//             <h2>Редактирование программы</h2>
+//             <form id="editForm">
+//
+//                 <label for="programSubjects">Предметы для сдачи:</label><br />
+//                 <textarea id="programSubjects" rows="2" cols="50"></textarea><br /><br />
+//                 <label for="programUni">ID университета:</label><br />
+//                 <textarea id="programUni" rows="2" cols="50"></textarea><br /><br />
+//
+//                 <button type="button" onclick="saveEditedProgram(${programID})">Сохранить изменения</button>
+//             </form>
+//         </div>
+//     `;
+//
+//     document.body.appendChild(modalContainer);
+//
+//     // // Устанавливаем фокус на первое поле
+//     // document.getElementById('proName').focus();
+// }
+//
+// function closeModalProgram() {
+//     document.body.removeChild(document.querySelector('.modal-container'));
+// }
+//
+// async function saveEditedProgram(programID) {
+//     const required_subjects = document.getElementById('programSubjects').value.split(',')
+//                             .map(c => c.trim())
+//                             .filter(Boolean); // Фильтрация пустых строк
+//     const university_id = document.getElementById('programUni').value.trim();
+//
+//     if (!required_subjects.length) {
+//         alert("Нужно указать хотя бы один предмет.");
+//         return;
+//     }
+//     if (!university_id.length) {
+//         alert("Нужно указать хотя бы один вуз.");
+//         return;
+//     }
+//
+//     try {
+//         const response = await fetch(`/api/program/update/${programID}`, {
+//             method: 'PUT',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({ // Только изменённые данные
+//                 required_subjects,
+//                 university_id
+//             })
+//         });
+//
+//         if (!response.ok) {
+//             throw new Error("Ошибка при обновлении программы");
+//         }
+//
+//         alert("Список программ успешно обновлён.");
+//         closeModalProgram(); // Закрываем окно после успешного сохранения
+//         // Можно вызвать функцию для обновления таблицы на странице
+//     } catch (err) {
+//         console.error(err);
+//         alert("Ошибка сервера при обновлении программ");
+//     }
+//     // Обновляем страницу с текущими данными университета
+//     await loadProgram();
+// }
+////
+
+
+
+// Удаление университета по ID
 async function deleteUniversity(id) {
     if (!confirm("Удалить университет?")) return;
 
@@ -156,23 +287,34 @@ async function deleteUniversity(id) {
         alert("Ошибка сервера");
     }
 }
+///////
 
-/**
- * Поиск по таблице
- */
-function searchTable() {
-    let filter = document.getElementById("searchInput").value.toLowerCase();
-    let rows = document.querySelectorAll("#uniTable tbody tr");
 
-    rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(filter) ? "" : "none";
-    });
+//Удаление программы по ID
+async function deleteProgram(id) {
+    if (!confirm("Удалить программу?")) return;
+
+    try {
+        const response = await fetch(`/api/program/delete/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            throw new Error("Ошибка удаления");
+        }
+
+        alert("Удалено!");
+        loadProgram(); // Обновляем таблицу
+
+    } catch (err) {
+        console.error(err);
+        alert("Ошибка сервера");
+    }
 }
+////////
 
-/**
- * Показать форму добавления университета
- */
+
+//Показ формы добавления университета
 function showAddForm() {
     const formHtml = `
         <div id="addFormContainer" style="margin: 20px 0;">
@@ -191,10 +333,10 @@ function showAddForm() {
         container.remove();
     });
 }
+//////
 
-/**
- * Добавление нового университета через API
- */
+
+//Добавление университета
 async function addUniversity() {
     const name = document.getElementById("newUniName").value.trim();
     const cities = document.getElementById("newUniCities").value.split(",").map(c => c.trim()).filter(c => c);
@@ -224,68 +366,10 @@ async function addUniversity() {
         alert("Ошибка сервера при добавлении университета");
     }
 }
+//////
 
-//////Функции для таблиц с программами, написаны ночью, ПЕРЕПРОВЕРИТЬ!
-async function loadProgram() {
-    try {
-        const response = await fetch("/api/program/all");
 
-        if (!response.ok) {
-            throw new Error("Ошибка загрузки данных");
-        }
-
-        const program = await response.json();
-        renderTablePr(program);
-
-    } catch (err) {
-        console.error(err);
-        alert("Ошибка при загрузке списка программ");
-    }
-}
-function renderTablePr(program) {
-    const tbody = document.querySelector("#programTable tbody");
-    tbody.innerHTML = "";
-
-    program.forEach(p => {
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-            <td>${p.id}</td>
-            <td>${p.name}</td>
-            <td>${p.required_subjects}</td>
-            <td>${p.university_id}</td>
-            
-            <td class="actions">
-                <button class="edit-btn" onclick="editProgram(${p.id})">Редактировать</button>
-                <button class="delete-btn" onclick="deleteProgram(${p.id})">Удалить</button>
-            </td>
-        `;
-
-        tbody.appendChild(tr);
-    });
-}
-
-async function deleteProgram(id) {
-    if (!confirm("Удалить программу?")) return;
-
-    try {
-        const response = await fetch(`/api/program/delete/${id}`, {
-            method: "DELETE"
-        });
-
-        if (!response.ok) {
-            throw new Error("Ошибка удаления");
-        }
-
-        alert("Удалено!");
-        loadProgram(); // Обновляем таблицу
-
-    } catch (err) {
-        console.error(err);
-        alert("Ошибка сервера");
-    }
-}
-
+//Показ формы добавления программы
 function showAddFormPr() {
     const formHtml = `
         <div id="addFormContainer" style="margin: 20px 0;">
@@ -305,10 +389,10 @@ function showAddFormPr() {
         container.remove();
     });
 }
+//////
 
-/**
- * Добавление новой программы через API
- */
+
+//Добавление программы
 async function addProgram() {
     const name = document.getElementById("newPrName").value.trim();
     const subjects = document.getElementById("newPrSubjects").value.split(",").map(c => c.trim()).filter(c => c);
@@ -349,84 +433,19 @@ async function addProgram() {
         alert("Ошибка сервера при добавлении программы");
     }
 }
+/////
 
-async function editProgram(id) {
-    openModalProgram(id);
+
+//Поиск по таблице университетов
+function searchTable() {
+    let filter = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.querySelectorAll("#uniTable tbody tr");
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
 }
 
-function openModalProgram(id) {
-    // window.location.href = `/api/universities/update/${id}`;
-    createModalWindowProgram(id);
-}
 
-function createModalWindowProgram(programID){
-    const modalContainer = document.createElement('div')
-    modalContainer.className = 'modal-container';
-
-    modalContainer.innerHTML = `
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModalProgram()">x</span>
-            <h2>Редактирование программы</h2>
-            <form id="editForm">
-
-                <label for="programSubjects">Предметы для сдачи:</label><br />
-                <textarea id="programSubjects" rows="2" cols="50"></textarea><br /><br />
-                <label for="programUni">ID университета:</label><br />
-                <textarea id="programUni" rows="2" cols="50"></textarea><br /><br />
-
-                <button type="button" onclick="saveEditedProgram(${programID})">Сохранить изменения</button>
-            </form>
-        </div>
-    `;
-
-    document.body.appendChild(modalContainer);
-
-    // // Устанавливаем фокус на первое поле
-    // document.getElementById('proName').focus();
-}
-
-function closeModalProgram() {
-    document.body.removeChild(document.querySelector('.modal-container'));
-}
-
-async function saveEditedProgram(programID) {
-    const required_subjects = document.getElementById('programSubjects').value.split(',')
-                            .map(c => c.trim())
-                            .filter(Boolean); // Фильтрация пустых строк
-    const university_id = document.getElementById('programUni').value.trim();
-
-    if (!required_subjects.length) {
-        alert("Нужно указать хотя бы один предмет.");
-        return;
-    }
-    if (!university_id.length) {
-        alert("Нужно указать хотя бы один вуз.");
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/program/update/${programID}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ // Только изменённые данные
-                required_subjects,
-                university_id
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error("Ошибка при обновлении программы");
-        }
-
-        alert("Список программ успешно обновлён.");
-        closeModalProgram(); // Закрываем окно после успешного сохранения
-        // Можно вызвать функцию для обновления таблицы на странице
-    } catch (err) {
-        console.error(err);
-        alert("Ошибка сервера при обновлении программ");
-    }
-    // Обновляем страницу с текущими данными университета
-    await loadProgram();
-}
+//Поиск по таблице программ
