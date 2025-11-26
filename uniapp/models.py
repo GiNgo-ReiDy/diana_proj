@@ -19,6 +19,6 @@ class ProgramDB(Base):
     id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String)
     required_subjects = mapped_column(ARRAY(Text))
-    university_id = mapped_column(ForeignKey("university.id"))
+    university_id = mapped_column(Integer, ForeignKey("university.id"))
 
     university = relationship("UniversityDB", back_populates="programs")

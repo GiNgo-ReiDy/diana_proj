@@ -307,7 +307,7 @@ function showAddFormPr() {
 async function addProgram() {
     const name = document.getElementById("newPrName").value.trim();
     const subjects = document.getElementById("newPrSubjects").value.split(",").map(c => c.trim()).filter(c => c);
-    const uniID = document.getElementById("newPrUniId").value.trim();
+    const uniid = document.getElementById("newPrUniId").value.trim();
 
 
     if (!name) {
@@ -319,7 +319,7 @@ async function addProgram() {
         alert("Обязательно сдавать предметы");
         return;
     }
-    if (!uniID) {
+    if (!uniid) {
         alert("Программа обязательно должна быть привязана к вузу");
         return;
     }
@@ -328,7 +328,7 @@ async function addProgram() {
         const response = await fetch("/api/program/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, subjects, uniID })
+            body: JSON.stringify({ name, subjects, uniid })
         });
 
         if (!response.ok) {

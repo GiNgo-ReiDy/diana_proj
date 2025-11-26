@@ -123,7 +123,7 @@ async def get_university_by_id(db: AsyncSession, university_id: int):
 
 async def get_programs(db: AsyncSession, skip: int = 0, limit: int = 100):
     try:
-        stmt = select(ProgramDB).options(ProgramDB.university).offset(skip).limit(limit)
+        stmt = select(ProgramDB).options(selectinload(ProgramDB.university)).offset(skip).limit(limit)
         result = await db.execute(stmt)
         return result.scalars().all()
     except Exception as e:
