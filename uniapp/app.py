@@ -17,6 +17,7 @@ from uniapp.database import get_session
 from uniapp.models import UniversityDB, ProgramDB
 from uniapp.api.data import router as data_router
 from uniapp.api.auth import router as auth_router
+from uniapp.api.program_data import router as program_router
 from uniapp.crud import update_university
 
 app = FastAPI()
@@ -30,6 +31,7 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 app.include_router(data_router, prefix="/api/universities", tags=["data"])
 app.include_router(auth_router, prefix="/api", tags=["auth"])
+app.include_router(program_router, prefix="/api/program", tags=["program_data"])
 
 @app.get("/", response_class=HTMLResponse)
 async def search_universities(

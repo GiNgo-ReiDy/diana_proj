@@ -1,11 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
     loadUniversities();
+    loadProgram();
 
     const searchInput = document.getElementById("searchInput");
     searchInput.addEventListener("keyup", searchTable);
 
     const addBtn = document.querySelector(".add-btn");
     addBtn.addEventListener("click", showAddForm);
+
+    const addProgramBtn = document.querySelector(".add-program-btn");
+    addProgramBtn.addEventListener("click", showAddFormPr);
 });
 
 async function editUniversity(id) {
@@ -298,12 +302,12 @@ function showAddFormPr() {
 }
 
 /**
- * Добавление нового университета через API
+ * Добавление новой программы через API
  */
 async function addProgram() {
     const name = document.getElementById("newPrName").value.trim();
     const subjects = document.getElementById("newPrSubjects").value.split(",").map(c => c.trim()).filter(c => c);
-    const uniID = document.getElementById("newPrUniId").value.split(",").map(c => c.trim()).filter(c => c);
+    const uniID = document.getElementById("newPrUniId").value.trim();
 
 
     if (!name) {
@@ -321,7 +325,7 @@ async function addProgram() {
     }
 
     try {
-        const response = await fetch("/api/universities/add", {
+        const response = await fetch("/api/program/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, subjects, uniID })

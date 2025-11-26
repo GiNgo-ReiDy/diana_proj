@@ -37,7 +37,6 @@ async def api_get_all_universities(
             "id": u.id,
             "name": u.name,
             "cities": u.cities,
-            "programs": [{"name": p.name, "required_subjects": p.required_subjects} for p in u.programs]
         }
         for u in universities
     ]

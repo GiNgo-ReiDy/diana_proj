@@ -14,7 +14,7 @@ h1 {
             margin-bottom: 20px;
         }
 
-.add-btn {
+.add-btn, .add-program-btn {
             padding: 10px 15px;
             background: #28a745;
             color: white;
@@ -23,7 +23,7 @@ h1 {
             cursor: pointer;
         }
 
-.add-btn:hover {
+.add-btn, .add-program-btn:hover {
             background: #1d7f32;
         }
 

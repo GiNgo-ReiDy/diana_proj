@@ -5,6 +5,8 @@ from uniapp.models import UniversityDB, ProgramDB
 from typing import List, Optional
 import logging
 
+from uniapp.schemas import Program
+
 logger = logging.getLogger(__name__)
 
 async def get_universities(db: AsyncSession, skip: int = 0, limit: int = 100):
@@ -115,4 +117,38 @@ async def get_university_by_id(db: AsyncSession, university_id: int):
         return result.scalar_one_or_none()
     except Exception as e:
         logger.error(f"Ошибка в get_university_by_id: {e}", exc_info=True)
+        raise
+
+# Функции для программ
+
+async def get_programs(db: AsyncSession, skip: int = 0, limit: int = 100):
+    try:
+        stmt = select(ProgramDB).options(ProgramDB.university).offset(skip).limit(limit)
+        result = await db.execute(stmt)
+        return result.scalars().all()
+    except Exception as e:
+        logger.error(f"Ошибка в get_programs: {e}", exc_info=True)
+        raise
+
+async def add_program(db: AsyncSession, name:str, subjects: List[str], uniid:int):
+    try:
+        db_program = ProgramDB(name=name, required_subjects=subjects, university_id=uniid)
+        db.add(db_program)
+        await db.commit()
+        await db.refresh(db_program)
+        return db_program
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Ошибка в add_program: {e}", exc_info=True)
+        raise
+
+async def delete_program(db: AsyncSession, program_id: int):
+    try:
+        stmt = delete(ProgramDB).where(ProgramDB.id == program_id)
+        result = await db.execute(stmt)
+        await db.commit()
+        return result.rowcount > 0
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Ошибка в delete_program: {e}", exc_info=True)
         raise
