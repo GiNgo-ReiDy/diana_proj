@@ -29,8 +29,9 @@ app.mount("/static", StaticFiles(directory="uniapp/static"), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 app.include_router(data_router, prefix="/api/universities", tags=["data"])
-app.include_router(auth_router, prefix="/api", tags=["auth"])
 app.include_router(program_router, prefix="/api/program", tags=["program_data"])
+app.include_router(auth_router, prefix="/api", tags=["auth"])
+
 
 @app.get("/", response_class=HTMLResponse)
 async def search_universities(
