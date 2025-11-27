@@ -163,3 +163,33 @@ async def delete_program(db: AsyncSession, program_id: int):
         await db.rollback()
         logger.error(f"Ошибка в delete_program: {e}", exc_info=True)
         raise
+
+async def update_program(db: AsyncSession,
+                         program_id: int,
+                         required_subjects: Optional[List[str]] = None,
+                         university_id: Optional[int] = None
+):
+    try:
+        stmt = (
+            select(ProgramDB)
+            .options(selectinload(ProgramDB.university))
+            .where(ProgramDB.id == program_id)
+        )
+
+        result = await db.execute(stmt)
+        db_program = result.scalar_one_or_none()
+
+        if db_program:
+            if required_subjects is not None:
+                db_program.required_subjects = ', '.join(required_subjects)
+
+            if university_id is not None:
+                db_program.university_id = university_id
+            await db.commit()
+            await db.refresh(db_program)
+            return db_program
+        return None
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Ошибка в update_program: {e}", exc_info=True)
+        raise

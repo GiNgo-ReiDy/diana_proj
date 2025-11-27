@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Query, Depends, Body, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from uniapp.crud import get_programs
+from uniapp.crud import get_programs, update_program
 from uniapp.database import get_session
+from typing import Optional, List
 
 router = APIRouter()
 
@@ -50,5 +51,21 @@ async def api_del_program(
         raise HTTPException(status_code=404, detail="Program not found")
     return {"status": "success", "message": f"University with id {program_id} deleted."}
 
+@router.patch("/update/{program_id}")
+async def api_update_program(
+        program_id : int,
+        required_subjects: Optional[List[str]] = Body(None),  # Список новых предметов
+        university_id: Optional[int] = Body(None),  # Новый ID университета
+        session: AsyncSession = Depends(get_session)
+):
+    from uniapp.crud import update_program
+    program = await update_program(session, program_id, required_subjects, university_id)
 
+    if program is None:
+        raise HTTPException(status_code=404, detail="Программа с ID {program_id}} не найдена")
 
+    return {
+        "id": program.id,
+        "required_subjects": program.required_subjects,
+        "university_id": program.university_id
+    }

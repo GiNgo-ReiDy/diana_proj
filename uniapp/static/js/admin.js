@@ -182,86 +182,95 @@ async function saveEditedUniversity(universityID) {
 
 
 //Все, что связано с редактированием программ: ЗАЧЕМ ОНО НАМ?
-// async function editProgram(id) {
-//     openModalProgram(id);
-// }
-//
-// function openModalProgram(id) {
-//     // window.location.href = `/api/universities/update/${id}`;
-//     createModalWindowProgram(id);
-// }
-//
-// function createModalWindowProgram(programID){
-//     const modalContainer = document.createElement('div')
-//     modalContainer.className = 'modal-container';
-//
-//     modalContainer.innerHTML = `
-//         <div class="modal-content">
-//             <span class="close-btn" onclick="closeModalProgram()">x</span>
-//             <h2>Редактирование программы</h2>
-//             <form id="editForm">
-//
-//                 <label for="programSubjects">Предметы для сдачи:</label><br />
-//                 <textarea id="programSubjects" rows="2" cols="50"></textarea><br /><br />
-//                 <label for="programUni">ID университета:</label><br />
-//                 <textarea id="programUni" rows="2" cols="50"></textarea><br /><br />
-//
-//                 <button type="button" onclick="saveEditedProgram(${programID})">Сохранить изменения</button>
-//             </form>
-//         </div>
-//     `;
-//
-//     document.body.appendChild(modalContainer);
-//
-//     // // Устанавливаем фокус на первое поле
-//     // document.getElementById('proName').focus();
-// }
-//
-// function closeModalProgram() {
-//     document.body.removeChild(document.querySelector('.modal-container'));
-// }
-//
-// async function saveEditedProgram(programID) {
-//     const required_subjects = document.getElementById('programSubjects').value.split(',')
-//                             .map(c => c.trim())
-//                             .filter(Boolean); // Фильтрация пустых строк
-//     const university_id = document.getElementById('programUni').value.trim();
-//
-//     if (!required_subjects.length) {
-//         alert("Нужно указать хотя бы один предмет.");
-//         return;
-//     }
-//     if (!university_id.length) {
-//         alert("Нужно указать хотя бы один вуз.");
-//         return;
-//     }
-//
-//     try {
-//         const response = await fetch(`/api/program/update/${programID}`, {
-//             method: 'PUT',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify({ // Только изменённые данные
-//                 required_subjects,
-//                 university_id
-//             })
-//         });
-//
-//         if (!response.ok) {
-//             throw new Error("Ошибка при обновлении программы");
-//         }
-//
-//         alert("Список программ успешно обновлён.");
-//         closeModalProgram(); // Закрываем окно после успешного сохранения
-//         // Можно вызвать функцию для обновления таблицы на странице
-//     } catch (err) {
-//         console.error(err);
-//         alert("Ошибка сервера при обновлении программ");
-//     }
-//     // Обновляем страницу с текущими данными университета
-//     await loadProgram();
-// }
+async function editProgram(id) {
+    openModalProgram(id);
+}
+
+function openModalProgram(id) {
+    // window.location.href = `/api/universities/update/${id}`;
+    createModalWindowProgram(id);
+}
+
+function createModalWindowProgram(programID){
+    const modalContainer = document.createElement('div')
+    modalContainer.className = 'modal-container';
+
+    modalContainer.innerHTML = `
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModalProgram()">x</span>
+            <h2>Редактирование программы №${programID}</h2>
+            <form id="editForm">
+
+                <label for="programSubjects">Предметы для сдачи:</label><br />
+                <textarea id="programSubjects" rows="2" cols="50"></textarea><br /><br />
+                <label for="programUni">ID университета:</label><br />
+                <textarea id="programUni" rows="2" cols="50"></textarea><br /><br />
+
+                <button type="button" onclick="saveEditedProgram(${programID})">Сохранить изменения</button>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modalContainer);
+
+    // // Устанавливаем фокус на первое поле
+    // document.getElementById('proName').focus();
+}
+
+function closeModalProgram() {
+    document.body.removeChild(document.querySelector('.modal-container'));
+}
+
+async function saveEditedProgram(programID) {
+    let updatedData = {};
+
+
+    const subjectsInput = document.getElementById('programSubjects').value.trim();
+
+    if (subjectsInput !== '') {
+        // Проверяем, есть ли запятые в строке
+        if (subjectsInput.includes(',')) {
+            // Есть запятые — значит, это несколько предметов
+            updatedData.required_subjects = subjectsInput.split(',')
+                                              .map(s => s.trim())      // Убираем лишнюю пунктуацию
+                                              .filter(Boolean);       // Удаляем пустые элементы
+        } else {
+            // Нет запятых — считается одним предметом
+            updatedData.required_subjects = [subjectsInput];
+        }
+    }
+
+    const uniIDInput = document.getElementById('programUni').value.trim();
+    if (uniIDInput !== '' && !isNaN(parseInt(uniIDInput))) { // Убедимся, что введено число
+        updatedData.university_id = parseInt(uniIDInput);
+    }
+
+    if (Object.keys(updatedData).length === 0) {
+        alert("Нет изменений для сохранения!");
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/program/update/${programID}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (!response.ok) {
+            throw new Error("Ошибка при обновлении программы");
+        }
+
+        alert("Изменения сохранены успешно.");
+        closeModalProgram();
+
+    } catch (err) {
+        console.error(err);
+        alert("Ошибка сервера при сохранении изменений");
+    }
+}
 ////
 
 
