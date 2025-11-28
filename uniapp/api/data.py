@@ -88,11 +88,23 @@ async def api_update_university(
 
     university = await update_university(session, university_id, name, cities)
     if university is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"University with id {university_id} not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"University with id {university_id} not found."
+        )
+
     return {
         "id": university.id,
         "name": university.name,
         "cities": university.cities,
-        "programs": [{"name": p.name, "required_subjects": p.required_subjects} for p in university.programs]
+        "programs": [
+            {
+                "name": p.name,
+                "mask_required_all": p.mask_required_all,
+                "mask_required_any": p.mask_required_any,
+                "university_id": p.university_id
+            }
+            for p in university.programs
+        ]
     }
 
