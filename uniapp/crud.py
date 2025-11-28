@@ -5,7 +5,6 @@ from uniapp.models import UniversityDB, ProgramDB
 from typing import List, Optional
 import logging
 
-from uniapp.schemas import Program
 
 logger = logging.getLogger(__name__)
 

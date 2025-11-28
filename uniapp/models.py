@@ -18,7 +18,15 @@ class ProgramDB(Base):
     __tablename__ = "program"
     id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String)
-    required_subjects = mapped_column(ARRAY(Text))
     university_id = mapped_column(Integer, ForeignKey("university.id"))
+    mask_required_all = mapped_column(Integer)
+    mask_required_any = mapped_column(Integer)
 
     university = relationship("UniversityDB", back_populates="programs")
+
+
+class SubjectsDB(Base):
+    __tablename__ = "subjects"
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String)
+
