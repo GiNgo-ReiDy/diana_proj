@@ -18,36 +18,49 @@ async def get_universities(db: AsyncSession, skip: int = 0, limit: int = 100):
         raise
 
 
-async def get_university(db: AsyncSession, subjects: Optional[List[str]] = None, cities: Optional[List[str]] = None):
+async def get_university(
+    db: AsyncSession,
+    subjects: Optional[List[str]] = None,
+    cities: Optional[List[str]] = None
+) -> List[UniversityDB]:
     try:
         stmt = select(UniversityDB).options(selectinload(UniversityDB.programs))
 
+        # Если нет фильтров — вернуть все университеты
         if not subjects and not cities:
             result = await db.execute(stmt)
             return result.scalars().all()
 
-        university_ids = None
+        university_ids: Optional[set[int]] = None
 
+        # Фильтр по предметам
         if subjects:
             subjects_stmt = select(ProgramDB.university_id).where(
-                func.array_to_string(ProgramDB.required_subjects, ',').ilike(f"%{subjects}%")
+                # Ищем хотя бы один совпадающий предмет в required_subjects
+                func.array_to_string(ProgramDB.required_subjects, ',').ilike(
+                    '|'.join([f"%{s}%" for s in subjects])
+                )
             ).distinct()
             result = await db.execute(subjects_stmt)
-            subjects_ids = {row[0] for row in result.all() if row[0]}
+            subjects_ids = {row[0] for row in result.all() if row[0] is not None}
             university_ids = subjects_ids if university_ids is None else university_ids & subjects_ids
 
+        # Фильтр по городам
         if cities:
-            # Проверяем города в массиве cities университета
             city_stmt = select(UniversityDB.id).where(
-                func.array_to_string(UniversityDB.cities, ',').ilike(f"%{cities}%")
+                func.array_to_string(UniversityDB.cities, ',').ilike(
+                    '|'.join([f"%{c}%" for c in cities])
+                )
             )
             result = await db.execute(city_stmt)
-            city_ids = {row[0] for row in result.all() if row[0]}
+            city_ids = {row[0] for row in result.all() if row[0] is not None}
             university_ids = city_ids if university_ids is None else university_ids & city_ids
 
+        # Если фильтры применялись, но пересечение пустое
         if university_ids is not None and not university_ids:
             return []
 
+        # Применяем фильтр по найденным id
         if university_ids is not None:
             stmt = stmt.where(UniversityDB.id.in_(list(university_ids)))
 
@@ -124,71 +137,89 @@ async def get_university_by_id(db: AsyncSession, university_id: int):
 
 # Функции для программ
 
-async def get_programs(db: AsyncSession, skip: int = 0, limit: int = 100):
-    try:
-        stmt = select(ProgramDB).options(selectinload(ProgramDB.university)).offset(skip).limit(limit)
-        result = await db.execute(stmt)
-        return result.scalars().all()
-    except Exception as e:
-        logger.error(f"Ошибка в get_programs: {e}", exc_info=True)
-        raise
+from sqlalchemy.ext.asyncio import AsyncSession
+from uniapp.models import ProgramDB
 
-async def add_program(db: AsyncSession, name:str, subjects: List[str], uniid:int):
-    try:
-        if not name.strip():
-            raise ValueError("Имя программы не может быть пустым.")
-        if len(subjects) == 0:
-            raise ValueError("Необходимо указать хотя бы один предмет.")
-        if uniid <= 0:
-            raise ValueError("Идентификатор университета должен быть положительным числом.")
+# Битовые маски для предметов
+SUBJECTS = {
+    "math": 1 << 0,
+    "russian": 1 << 1,
+    "physics": 1 << 2,
+    "informatics": 1 << 3,
+    "chemistry": 1 << 4,
+    "biology": 1 << 5,
+    "geography": 1 << 6,
+    "literature": 1 << 7,
+    "history": 1 << 8,
+    "social": 1 << 9,
+    "english": 1 << 10,
+    "profilmath": 1 << 11,
+    "obzh": 1 << 12,
+    # добавь остальные до 15
+}
 
-        db_program = ProgramDB(name=name, required_subjects=subjects, university_id=uniid)
-        db.add(db_program)
-        await db.commit()
-        await db.refresh(db_program)
-        return db_program
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Ошибка в add_program: {e}", exc_info=True)
-        raise
+def subjects_to_mask(subject_list: list[str]) -> int:
+    mask = 0
+    for s in subject_list:
+        if s in SUBJECTS:
+            mask |= SUBJECTS[s]
+    return mask
 
-async def delete_program(db: AsyncSession, program_id: int):
-    try:
-        stmt = delete(ProgramDB).where(ProgramDB.id == program_id)
-        result = await db.execute(stmt)
-        await db.commit()
-        return result.rowcount > 0
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Ошибка в delete_program: {e}", exc_info=True)
-        raise
+async def add_program(db: AsyncSession, name: str, subjects: list[str], uniid: int):
+    mask = subjects_to_mask(subjects)
+    db_program = ProgramDB(
+        name=name,
+        university_id=uniid,
+        mask_required_all=mask,
+        mask_required_any=0  # пока без OR-предметов
+    )
+    db.add(db_program)
+    await db.commit()
+    await db.refresh(db_program)
+    return db_program
 
-async def update_program(db: AsyncSession,
-                         program_id: int,
-                         required_subjects: Optional[List[str]] = None,
-                         university_id: Optional[int] = None
+# ---- Получить все программы ----
+async def get_programs(db: AsyncSession):
+    result = await db.execute(select(ProgramDB))
+    return result.scalars().all()
+
+# ---- Обновить программу ----
+async def update_program(
+    db: AsyncSession,
+    program_id: int,
+    required_all: List[int] = None,
+    required_any: List[int] = None,
+    university_id: int = None
 ):
-    try:
-        stmt = (
-            select(ProgramDB)
-            .options(selectinload(ProgramDB.university))
-            .where(ProgramDB.id == program_id)
-        )
-
-        result = await db.execute(stmt)
-        db_program = result.scalar_one_or_none()
-
-        if db_program:
-            if required_subjects is not None:
-                db_program.required_subjects = ', '.join(required_subjects)
-
-            if university_id is not None:
-                db_program.university_id = university_id
-            await db.commit()
-            await db.refresh(db_program)
-            return db_program
+    stmt = update(ProgramDB).where(ProgramDB.id == program_id)
+    values = {}
+    if required_all is not None:
+        values["mask_required_all"] = make_mask(required_all)
+    if required_any is not None:
+        values["mask_required_any"] = make_mask(required_any)
+    if university_id is not None:
+        values["university_id"] = university_id
+    if not values:
         return None
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Ошибка в update_program: {e}", exc_info=True)
-        raise
+    stmt = stmt.values(**values).returning(ProgramDB)
+    result = await db.execute(stmt)
+    await db.commit()
+    return result.scalar_one_or_none()
+
+# ---- Удалить программу ----
+async def delete_program(db: AsyncSession, program_id: int):
+    stmt = delete(ProgramDB).where(ProgramDB.id == program_id)
+    result = await db.execute(stmt)
+    await db.commit()
+    return result.rowcount > 0
+
+# ---- Фильтр по маске ----
+async def filter_programs(db: AsyncSession, user_mask: int):
+    query = select(ProgramDB).where(
+        (user_mask.op("&")(ProgramDB.mask_required_all) == ProgramDB.mask_required_all) &
+        ((ProgramDB.mask_required_any == 0) |
+         (user_mask.op("&")(ProgramDB.mask_required_any) != 0))
+    )
+    result = await db.execute(query)
+    return result.scalars().all()
+

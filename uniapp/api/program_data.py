@@ -1,71 +1,94 @@
-from fastapi import APIRouter, Query, Depends, Body, HTTPException, status
+from fastapi import APIRouter, Depends, Body, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from uniapp.crud import get_programs, update_program
+from typing import List
+from uniapp.crud import get_programs, add_program, update_program, delete_program, filter_programs
 from uniapp.database import get_session
-from typing import Optional, List
+from pydantic import BaseModel
+
 
 router = APIRouter()
 
+# ---- GET все программы ----
 @router.get("/all")
-async def api_get_all_programs(
-    session: AsyncSession = Depends(get_session)
-):
+async def api_get_all_programs(session: AsyncSession = Depends(get_session)):
     programs = await get_programs(session)
     return [
         {
             "id": p.id,
             "name": p.name,
-            "required_subjects": p.required_subjects,
-            "university_id": p.university_id,
-        }
-        for p in programs
+            "mask_required_all": p.mask_required_all,
+            "mask_required_any": p.mask_required_any,
+            "university_id": p.university_id
+        } for p in programs
     ]
+
+
+class ProgramCreate(BaseModel):
+    name: str
+    subjects: list[str]
+    university_id: int
 
 @router.post("/add")
 async def api_add_program(
-    name: str = Body(...),
-    subjects: list[str] = Body(...),
-    uniid: int = Body(...),
+    payload: ProgramCreate = Body(...),
     session: AsyncSession = Depends(get_session)
 ):
-
-    from uniapp.crud import add_program
-
-    program = await add_program(session, name, subjects, uniid)
-    return{
+    if not payload.subjects:
+        raise HTTPException(status_code=400, detail="Необходимо указать хотя бы один предмет")
+    
+    program = await add_program(
+        db=session,
+        name=payload.name,
+        subjects=payload.subjects,
+        uniid=payload.university_id
+    )
+    return {
         "id": program.id,
         "name": program.name,
-        "required_subjects": program.required_subjects,
-        "university_id": program.university_id,
+        "mask_required_all": program.mask_required_all,
+        "mask_required_any": program.mask_required_any,
+        "university_id": program.university_id
     }
 
+# ---- DELETE удалить программу ----
 @router.delete("/delete/{program_id}")
-async def api_del_program(
-        program_id: int,
-        session: AsyncSession = Depends(get_session)
-):
-
-    from uniapp.crud import delete_program
+async def api_delete_program(program_id: int, session: AsyncSession = Depends(get_session)):
     deleted = await delete_program(session, program_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Program not found")
-    return {"status": "success", "message": f"University with id {program_id} deleted."}
+    return {"status": "success", "message": f"Program {program_id} deleted"}
 
+# ---- PATCH обновить программу ----
 @router.patch("/update/{program_id}")
 async def api_update_program(
-        program_id : int,
-        required_subjects: Optional[List[str]] = Body(None),  # Список новых предметов
-        university_id: Optional[int] = Body(None),  # Новый ID университета
-        session: AsyncSession = Depends(get_session)
+    program_id: int,
+    required_all: List[int] = Body(None),
+    required_any: List[int] = Body(None),
+    university_id: int = Body(None),
+    session: AsyncSession = Depends(get_session)
 ):
-    from uniapp.crud import update_program
-    program = await update_program(session, program_id, required_subjects, university_id)
-
+    program = await update_program(session, program_id, required_all, required_any, university_id)
     if program is None:
-        raise HTTPException(status_code=404, detail="Программа с ID {program_id}} не найдена")
-
+        raise HTTPException(status_code=404, detail=f"Program {program_id} not found")
     return {
         "id": program.id,
-        "required_subjects": program.required_subjects,
+        "mask_required_all": program.mask_required_all,
+        "mask_required_any": program.mask_required_any,
         "university_id": program.university_id
     }
+
+# ---- POST фильтр по предметам ----
+@router.post("/filter")
+async def api_filter_programs(subject_ids: List[int] = Body(...), session: AsyncSession = Depends(get_session)):
+    from uniapp.crud import make_mask
+    user_mask = make_mask(subject_ids)
+    programs = await filter_programs(session, user_mask)
+    return [
+        {
+            "id": p.id,
+            "name": p.name,
+            "mask_required_all": p.mask_required_all,
+            "mask_required_any": p.mask_required_any,
+            "university_id": p.university_id
+        } for p in programs
+    ]

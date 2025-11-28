@@ -305,26 +305,35 @@ function showAddFormPr() {
 }
 async function addProgram() {
     const name = document.getElementById("newPrName").value.trim();
-    const subjects = (document.getElementById("newPrSubjects").value || '').split(",").map(c => c.trim()).filter(c => c);
-    const uniid = document.getElementById("newPrUniId").value.trim();
+    const subjects = (document.getElementById("newPrSubjects").value || '')
+        .split(",")
+        .map(c => c.trim())
+        .filter(c => c);
+    const university_id = parseInt(document.getElementById("newPrUniId").value.trim());
+
     if (!name) { alert("Название программы обязательно"); return; }
-    if (!subjects.length) { alert("Обязательно сдавать предметы"); return; }
-    if (!uniid) { alert("Программа обязательно должна быть привязана к вузу"); return; }
+    if (!subjects.length) { alert("Нужно указать хотя бы один предмет"); return; }
+    if (!university_id) { alert("Нужно указать ID университета"); return; }
+
     try {
         const response = await fetch("/api/program/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, subjects, uniid })
+            body: JSON.stringify({ name, subjects, university_id })
         });
-        if (!response.ok) throw new Error("Ошибка при добавлении программы");
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(JSON.stringify(err));
+        }
         alert("Программа добавлена!");
         document.getElementById("addFormContainer").remove();
-        loadProgram();
+        await loadProgram();
     } catch (err) {
         console.error(err);
-        alert("Ошибка сервера при добавлении программы");
+        alert("Ошибка при добавлении программы:\n" + err.message);
     }
 }
+
 
 // Search
 function searchTable() {

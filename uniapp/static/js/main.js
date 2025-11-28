@@ -34,7 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
         citiesLabel.textContent = selectedCities.length ? selectedCities.join(", ") : "Города";
 
         const selectedSubjects = Array.from(document.querySelectorAll(".subject-list input:checked")).map(cb => cb.value);
-        document.querySelector(".subjects-label").textContent = selectedSubjects.length ? selectedSubjects.join(", ") : "Предметы";
+        const subjectsLabel = document.querySelector(".subjects-label");
+        if (subjectsLabel) subjectsLabel.textContent = selectedSubjects.length ? selectedSubjects.join(", ") : "Предметы";
     }
 
     // Изначально КНР
@@ -46,33 +47,37 @@ document.addEventListener("DOMContentLoaded", () => {
         renderCities(country);
     });
 
-    // Выпадающие списки
-    document.querySelector(".subjects-btn").addEventListener("click", (e) => {
+    document.querySelector(".subjects-btn")?.addEventListener("click", (e) => {
         e.preventDefault();
-        document.querySelector(".subject-list").classList.toggle("hidden");
+        document.querySelector(".subject-list")?.classList.toggle("hidden");
     });
-    document.querySelector(".cities-btn").addEventListener("click", (e) => {
+
+    document.querySelector(".cities-btn")?.addEventListener("click", (e) => {
         e.preventDefault();
         citiesList.classList.toggle("hidden");
     });
 
-    // Форма поиска
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const subjects = Array.from(document.querySelectorAll(".subject-list input:checked")).map(cb => cb.value);
-        const citiesSelected = Array.from(document.querySelectorAll(".cities-list input:checked")).map(cb => cb.value);
+
+        const selectedSubjects = Array.from(document.querySelectorAll(".subject-list input:checked")).map(cb => cb.value);
+        const selectedCities = Array.from(document.querySelectorAll(".cities-list input:checked")).map(cb => cb.value);
 
         errorBox.style.display = "none";
         errorBox.textContent = "";
         resultsContainer.innerHTML = "";
 
         try {
-            const url = `/api/universities/get_universities/?subjects=${encodeURIComponent(subjects.join(","))}&city=${encodeURIComponent(citiesSelected.join(","))}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error();
+            // Формируем URLSearchParams для корректной передачи массивов
+            const params = new URLSearchParams();
+            selectedSubjects.forEach(s => params.append("subjects", s));
+            selectedCities.forEach(c => params.append("cities", c));
+
+            const response = await fetch(`/api/universities/get_universities?${params.toString()}`);
+            if (!response.ok) throw new Error("Сервер вернул ошибку");
 
             const data = await response.json();
-            if (!data || data.length === 0) {
+            if (!data.length) {
                 resultsContainer.innerHTML = "<p>Университеты не найдены</p>";
                 return;
             }
@@ -85,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const subUl = document.createElement("ul");
                     u.programs.forEach(p => {
                         const subLi = document.createElement("li");
-                        subLi.textContent = `Программа: ${p.name} | Предметы: ${p.required_subjects.join(", ")}`;
+                        subLi.textContent = `Программа: ${p.name} | Обязательные: ${p.mask_required_all} | Любой из: ${p.mask_required_any}`;
                         subUl.appendChild(subLi);
                     });
                     li.appendChild(subUl);
@@ -97,10 +102,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
             errorBox.style.display = "block";
             errorBox.textContent = "Ошибка при выполнении запроса";
+            console.error(err);
         }
     });
 
-    // Обновление подписей при изменении предметов
     document.querySelectorAll(".subject-list input[type='checkbox']").forEach(cb =>
         cb.addEventListener("change", updateLabels)
     );

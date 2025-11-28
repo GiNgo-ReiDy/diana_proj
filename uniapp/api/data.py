@@ -5,26 +5,32 @@ from uniapp.database import get_session
 
 router = APIRouter()  # ← именно router, а не функция
 
+
 @router.get("/get_universities")
 async def api_search_universities(
-    subjects: str | None = Query(None),
-    city: str | None = Query(None),
+    subjects: list[str] | None = Query(None),
+    cities: list[str] | None = Query(None),
     session: AsyncSession = Depends(get_session)
 ):
-    universities = await get_university(
-        session,
-        subjects=[subjects] if subjects else None,
-        cities=[city] if city else None,
-    )
+    universities = await get_university(session, subjects=subjects, cities=cities)
     return [
         {
             "id": u.id,
             "name": u.name,
             "cities": u.cities,
-            "programs": [{"name": p.name, "required_subjects": p.required_subjects} for p in u.programs]
+            "programs": [
+                {
+                    "name": p.name,
+                    "mask_required_all": p.mask_required_all,
+                    "mask_required_any": p.mask_required_any,
+                    "university_id": p.university_id
+                }
+                for p in u.programs
+            ]
         }
         for u in universities
     ]
+
 
 
 @router.get("/all")
