@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import update
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select, func, delete
+from sqlalchemy import select, func, delete, or_, and_
 from uniapp.models import UniversityDB, ProgramDB
 from typing import List, Optional
 import logging
@@ -111,8 +112,7 @@ async def update_university(db: AsyncSession,
             if name:
                 db_university.name = name
             if cities is not None:
-                updated_cities = set(db_university.cities).union(set(cities))
-                db_university.cities = sorted(list(updated_cities))
+                db_university.cities = cities
 
             await db.commit()
             await db.refresh(db_university)
@@ -165,18 +165,31 @@ def subjects_to_mask(subject_list: list[str]) -> int:
             mask |= SUBJECTS[s]
     return mask
 
+def make_mask(indices: List[int]) -> int:
+    """Создает битовую маску из списка индексов."""
+    mask = 0
+    for index in indices:
+        mask |= (1 << index)
+    return mask
+
 async def add_program(db: AsyncSession, name: str, subjects: list[str], uniid: int):
-    mask = subjects_to_mask(subjects)
-    db_program = ProgramDB(
-        name=name,
-        university_id=uniid,
-        mask_required_all=mask,
-        mask_required_any=0  # пока без OR-предметов
-    )
-    db.add(db_program)
-    await db.commit()
-    await db.refresh(db_program)
-    return db_program
+    try:
+        mask = subjects_to_mask(subjects)
+
+        db_program = ProgramDB(
+            name=name,
+            university_id=uniid,
+            mask_required_all=mask,
+            mask_required_any=0  # Пока игнорируем предметы "OR"
+        )
+        db.add(db_program)
+        await db.commit()
+        await db.refresh(db_program)
+        return db_program
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Ошибка в add_program: {e}", exc_info=True)
+        raise
 
 # ---- Получить все программы ----
 async def get_programs(db: AsyncSession):
@@ -191,35 +204,53 @@ async def update_program(
     required_any: List[int] = None,
     university_id: int = None
 ):
-    stmt = update(ProgramDB).where(ProgramDB.id == program_id)
-    values = {}
-    if required_all is not None:
-        values["mask_required_all"] = make_mask(required_all)
-    if required_any is not None:
-        values["mask_required_any"] = make_mask(required_any)
-    if university_id is not None:
-        values["university_id"] = university_id
-    if not values:
-        return None
-    stmt = stmt.values(**values).returning(ProgramDB)
-    result = await db.execute(stmt)
-    await db.commit()
-    return result.scalar_one_or_none()
+    try:
+        stmt = update(ProgramDB).where(ProgramDB.id == program_id)
+        values = {}
+        if required_all is not None:
+            values["mask_required_all"] = make_mask(required_all)
+        if required_any is not None:
+            values["mask_required_any"] = make_mask(required_any)
+        if university_id is not None:
+            values["university_id"] = university_id
+        if not values:
+            return None
+        stmt = stmt.values(**values).returning(ProgramDB)
+        result = await db.execute(stmt)
+        await db.commit()
+        return result.scalar_one_or_none()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Ошибка в update_program: {e}", exc_info=True)
+        raise
 
 # ---- Удалить программу ----
 async def delete_program(db: AsyncSession, program_id: int):
-    stmt = delete(ProgramDB).where(ProgramDB.id == program_id)
-    result = await db.execute(stmt)
-    await db.commit()
-    return result.rowcount > 0
+    try:
+        stmt = delete(ProgramDB).where(ProgramDB.id == program_id)
+        result = await db.execute(stmt)
+        await db.commit()
+        return result.rowcount > 0
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Ошибка в delete_program: {e}", exc_info=True)
+        raise
 
 # ---- Фильтр по маске ----
 async def filter_programs(db: AsyncSession, user_mask: int):
-    query = select(ProgramDB).where(
-        (user_mask.op("&")(ProgramDB.mask_required_all) == ProgramDB.mask_required_all) &
-        ((ProgramDB.mask_required_any == 0) |
-         (user_mask.op("&")(ProgramDB.mask_required_any) != 0))
-    )
-    result = await db.execute(query)
-    return result.scalars().all()
+    try:
+        query = select(ProgramDB).where(
+            and_(
+                (ProgramDB.mask_required_all.op("&")(user_mask)) == ProgramDB.mask_required_all,
+                or_(
+                    ProgramDB.mask_required_any == 0,
+                    (ProgramDB.mask_required_any.op("&")(user_mask)) != 0
+                )
+            )
+        )
+        result = await db.execute(query)
+        return result.scalars().all()
+    except Exception as e:
+        logger.error(f"Ошибка в filter_programs: {e}", exc_info=True)
+        raise
 

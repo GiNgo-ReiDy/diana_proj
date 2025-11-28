@@ -1,10 +1,12 @@
+import logging
 from fastapi import APIRouter, Query, Depends, Body, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from uniapp.crud import get_university, get_universities
 from uniapp.database import get_session
 
 router = APIRouter()  # ← именно router, а не функция
-
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @router.get("/get_universities")
 async def api_search_universities(
