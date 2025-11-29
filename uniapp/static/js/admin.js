@@ -56,18 +56,71 @@ async function loadProgram() {
         const response = await fetch("/api/program/all");
         if (!response.ok) throw new Error("Ошибка загрузки данных");
         const program = await response.json();
-        // Нормализуем полученные записи (на фронте)
-        const normalized = program.map(p => ({
+
+        // Преобразуем биты в массив предметов для каждого элемента
+        const normalizedPrograms = program.map(p => ({
             ...p,
-            required_subjects: normalizeSubjects(p.required_subjects)
+            required_subjects: maskToSubjects(p.mask_required_all), // Обязательные предметы
+            optional_subjects: maskToSubjects(p.mask_required_any)  // Факультативные предметы
         }));
+
         console.log('program raw:', program);
-        console.log('program normalized:', normalized);
-        renderTablePr(normalized);
+        console.log('program normalized:', normalizedPrograms);
+        renderTablePr(normalizedPrograms);
     } catch (err) {
         console.error(err);
         alert("Ошибка при загрузке списка программ");
     }
+}
+
+// Переводит битовую маску в список предметов
+function maskToSubjects(mask) {
+    const SUBJECTS_BITS = {
+        biology: 1 << 0,
+        geography: 1 << 1,
+        foreign: 1 << 2,
+        informatics: 1 << 3,
+        history: 1 << 4,
+        literature: 1 << 5,
+        math: 1 << 6,
+        social: 1 << 7,
+        russian: 1 << 8,
+        physics: 1 << 9,
+        chemistry: 1 << 10,
+    };
+
+    const subjects = [];
+    Object.entries(SUBJECTS_BITS).forEach(([subject, bitValue]) => {
+        if ((mask & bitValue) > 0) {
+            subjects.push(subject);
+        }
+    });
+    return subjects;
+}
+
+// Function to convert an array of subjects into a bitmask
+function convertSubjectsToBitmask(subjects) {
+    const SUBJECTS_BITMAP = {
+        "биология": 1 << 0,
+        "география": 1 << 1,
+        "иностранный язык": 1 << 2,
+        "информатика": 1 << 3,
+        "история": 1 << 4,
+        "литература": 1 << 5,
+        "профильная математика": 1 << 6,
+        "обществознание": 1 << 7,
+        "русский язык": 1 << 8,
+        "физика": 1 << 9,
+        "химия": 1 << 10,
+    };
+
+    let bitmask = 0;
+    subjects.forEach(subject => {
+        if (SUBJECTS_BITMAP.hasOwnProperty(subject)) {
+            bitmask |= SUBJECTS_BITMAP[subject];
+        }
+    });
+    return bitmask;
 }
 
 // ----- Render tables -----
@@ -91,24 +144,30 @@ function renderTable(universities) {
     });
 }
 
-function renderTablePr(program) {
+function renderTablePr(programs) {
     const tbody = document.querySelector("#programTable tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    program.forEach(p => {
-        const subjArray = normalizeSubjects(p.required_subjects) || [];
-        const subjects = subjArray.join(", ");
-        const tr = document.createElement("tr");
+    programs.forEach(prog => {
+        // Безопасно преобразуем маски в текстовые представления предметов
+        const requiredAllSubjects = prog.mask_required_all !== undefined && prog.mask_required_all !== null
+            ? maskToSubjects(prog.mask_required_all).join(', ')
+            : "не указано";
 
+        const requiredAnySubjects = prog.mask_required_any !== undefined && prog.mask_required_any !== null
+            ? maskToSubjects(prog.mask_required_any).join(', ')
+            : "не указано";
+
+        const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${p.id}</td>
-            <td>${p.name}</td>
-            <td>${subjects}</td>
-            <td>${p.university_id}</td>
+            <td>${prog.id}</td>
+            <td>${prog.name}</td>
+            <td>Обязательно: ${requiredAllSubjects}<br />Дополнительно: ${requiredAnySubjects}</td>
+            <td>${prog.university_id}</td>
             <td class="actions">
-                <button class="edit-btn" onclick="editProgram(${p.id})">Редактировать</button>
-                <button class="delete-btn" onclick="deleteProgram(${p.id})">Удалить</button>
+                <button class="edit-btn" onclick="editProgram(${prog.id})">Редактировать</button>
+                <button class="delete-btn" onclick="deleteProgram(${prog.id})">Удалить</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -169,8 +228,15 @@ function createModalWindowProgram(programID){
             <span class="close-btn" onclick="closeModalProgram()">x</span>
             <h2>Редактирование программы №${programID}</h2>
             <form id="editForm">
-                <label for="programSubjects">Предметы для сдачи:</label><br />
-                <textarea id="programSubjects" rows="2" cols="50"></textarea><br /><br />
+                <!-- Поле для обязательных предметов -->
+                <label for="requiredSubjects">Обязательные предметы:</label><br />
+                <textarea id="requiredSubjects" rows="2" cols="50"></textarea><br /><br />
+        
+                <!-- Поле для факультативных предметов -->
+                <label for="optionalSubjects">Факультативные предметы:</label><br />
+                <textarea id="optionalSubjects" rows="2" cols="50"></textarea><br /><br />
+        
+                <!-- Поле для университета -->
                 <label for="programUni">ID университета:</label><br />
                 <textarea id="programUni" rows="2" cols="50"></textarea><br /><br />
                 <button type="button" onclick="saveEditedProgram(${programID})">Сохранить изменения</button>
@@ -185,44 +251,58 @@ function closeModalProgram() {
 }
 
 async function saveEditedProgram(programID) {
-    let updatedData = {};
+    // Получаем данные из формы
+    const requiredSubjectsRaw = document.getElementById('requiredSubjects').value || ''; // Обязательные предметы
+    const optionalSubjectsRaw = document.getElementById('optionalSubjects').value || ''; // Факультативные предметы
+    const universityID = document.getElementById('programUni').value.trim();
 
-    // Берём значение как строку
-    const subjectsRaw = document.getElementById('programSubjects').value || '';
-    // Нормализуем в массив
-    const subjectsArr = normalizeSubjects(subjectsRaw);
+    // Нормализуем и собираем данные
+    const normalizedRequiredSubjects = normalizeSubjects(requiredSubjectsRaw);
+    const normalizedOptionalSubjects = normalizeSubjects(optionalSubjectsRaw);
 
-    if (subjectsArr && subjectsArr.length) {
-        updatedData.required_subjects = subjectsArr;
-    }
-
-    const uniIDInput = (document.getElementById('programUni').value || '').trim();
-    if (uniIDInput !== '' && !isNaN(parseInt(uniIDInput))) {
-        updatedData.university_id = parseInt(uniIDInput);
-    }
-
-    if (Object.keys(updatedData).length === 0) {
-        alert("Нет изменений для сохранения!");
+    // Проверяем корректность данных
+    if (!(normalizedRequiredSubjects.length || normalizedOptionalSubjects.length)) {
+        alert("Необходимо заполнить хотя бы одно из полей: обязательные или факультативные предметы!");
         return;
     }
 
-    console.log('sending updatedData:', updatedData);
+    if (isNaN(universityID)) {
+        alert("Введите корректный ID университета!");
+        return;
+    }
+
+    // Преобразуем массивы предметов в битовые маски
+    const requiredSubjectsBitmask = convertSubjectsToBitmask(normalizedRequiredSubjects);
+    const optionalSubjectsBitmask = convertSubjectsToBitmask(normalizedOptionalSubjects);
+
+    // Готовим данные для отправки
+    const updatedData = {
+        required_all: requiredSubjectsBitmask,
+        required_any: optionalSubjectsBitmask,
+        university_id: parseInt(universityID)
+    };
+
+    // 🔥 Выводим в консоль отправляемые данные
+    console.log("Отправляемые данные:", updatedData);
 
     try {
+        // Отправляем PATCH-запрос на сервер
         const response = await fetch(`/api/program/update/${programID}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updatedData)
         });
-        if (!response.ok) throw new Error("Ошибка при обновлении программы");
+
+        if (!response.ok) {
+            throw new Error("Ошибка при обновлении программы");
+        }
+
         alert("Изменения сохранены успешно.");
         closeModalProgram();
     } catch (err) {
         console.error(err);
         alert("Ошибка сервера при сохранении изменений");
     }
-
-    await loadProgram();
 }
 
 // Delete
@@ -291,7 +371,10 @@ function showAddFormPr() {
     const formHtml = `
         <div id="addFormContainer" style="margin: 20px 0;">
             <input type="text" id="newPrName" placeholder="Название программы" required>
-            <input type="text" id="newPrSubjects" placeholder="Необходимые предметы(через запятую)" required>
+            <label for="newPrReqSubjects">Обязательные предметы (через запятую)</label>
+            <textarea id="newPrReqSubjects" rows="2" cols="50" required></textarea>
+            <label for="newPrOptSubjects">Факультативные предметы (через запятую)</label>
+            <textarea id="newPrOptSubjects" rows="2" cols="50"></textarea>
             <input type="text" id="newPrUniId" placeholder="ID вуза" required>
             <button id="submitAdd">Добавить</button>
             <button id="cancelAdd">Отмена</button>
@@ -303,28 +386,57 @@ function showAddFormPr() {
     document.getElementById("submitAdd").addEventListener("click", addProgram);
     document.getElementById("cancelAdd").addEventListener("click", () => container.remove());
 }
+
 async function addProgram() {
+    // Получаем данные из формы
     const name = document.getElementById("newPrName").value.trim();
-    const subjects = (document.getElementById("newPrSubjects").value || '')
-        .split(",")
-        .map(c => c.trim())
-        .filter(c => c);
+    const reqSubjectsRaw = document.getElementById("newPrReqSubjects").value || '';
+    const optSubjectsRaw = document.getElementById("newPrOptSubjects").value || '';
     const university_id = parseInt(document.getElementById("newPrUniId").value.trim());
 
-    if (!name) { alert("Название программы обязательно"); return; }
-    if (!subjects.length) { alert("Нужно указать хотя бы один предмет"); return; }
-    if (!university_id) { alert("Нужно указать ID университета"); return; }
+    // Нормализуем и обрабатываем данные
+    const normalizedReqSubjects = normalizeSubjects(reqSubjectsRaw);
+    const normalizedOptSubjects = normalizeSubjects(optSubjectsRaw);
+
+    // Проверяем корректность данных
+    if (!name) {
+        alert("Название программы обязательно");
+        return;
+    }
+    if (!normalizedReqSubjects.length && !normalizedOptSubjects.length) {
+        alert("Необходимо указать хотя бы один предмет (обязательный или факультативный)");
+        return;
+    }
+    if (!university_id) {
+        alert("Нужно указать ID университета");
+        return;
+    }
+
+    // Преобразуем массивы предметов в битовые маски
+    const requiredSubjectsBitmask = convertSubjectsToBitmask(normalizedReqSubjects);
+    const optionalSubjectsBitmask = convertSubjectsToBitmask(normalizedOptSubjects);
+
+    // Готовим данные для отправки
+    const postData = {
+        name: name,
+        required_all: requiredSubjectsBitmask,
+        required_any: optionalSubjectsBitmask,
+        university_id: university_id
+    };
 
     try {
+        // Отправляем POST-запрос на сервер
         const response = await fetch("/api/program/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, subjects, university_id })
+            body: JSON.stringify(postData)
         });
+
         if (!response.ok) {
             const err = await response.json();
             throw new Error(JSON.stringify(err));
         }
+
         alert("Программа добавлена!");
         document.getElementById("addFormContainer").remove();
         await loadProgram();
@@ -333,7 +445,6 @@ async function addProgram() {
         alert("Ошибка при добавлении программы:\n" + err.message);
     }
 }
-
 
 // Search
 function searchTable() {

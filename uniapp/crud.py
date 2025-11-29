@@ -151,20 +151,17 @@ from uniapp.models import ProgramDB
 
 # Битовые маски для предметов
 SUBJECTS = {
-    "math": 1 << 0,
-    "russian": 1 << 1,
-    "physics": 1 << 2,
-    "informatics": 1 << 3,
-    "chemistry": 1 << 4,
-    "biology": 1 << 5,
-    "geography": 1 << 6,
-    "literature": 1 << 7,
-    "history": 1 << 8,
-    "social": 1 << 9,
-    "english": 1 << 10,
-    "profilmath": 1 << 11,
-    "obzh": 1 << 12,
-    # добавь остальные до 15
+    "биология": 1 << 0,
+    "география": 1 << 1,
+    "иностранный язык": 1 << 2,
+    "информатика": 1 << 3,
+    "история": 1 << 4,
+    "литература": 1 << 5,
+    "профильная математика": 1 << 6,
+    "обществознание": 1 << 7,
+    "русский язык": 1 << 8,
+    "физика": 1 << 9,
+    "химия": 1 << 10,
 }
 
 def subjects_to_mask(subject_list: list[str]) -> int:
@@ -174,22 +171,27 @@ def subjects_to_mask(subject_list: list[str]) -> int:
             mask |= SUBJECTS[s]
     return mask
 
-def make_mask(indices: List[int]) -> int:
-    """Создает битовую маску из списка индексов."""
-    mask = 0
-    for index in indices:
-        mask |= (1 << index)
-    return mask
+def mask_to_subjects(mask: int) -> List[str]:
+    subjects = []
+    for subject_name, subject_bit in SUBJECTS.items():
+        if mask & subject_bit:
+            subjects.append(subject_name)
+    return subjects
 
-async def add_program(db: AsyncSession, name: str, subjects: list[str], uniid: int):
+async def add_program(
+    db: AsyncSession,
+    name: str,
+    required_all: int,
+    required_any: int,
+    university_id: int
+):
     try:
-        mask = subjects_to_mask(subjects)
-
+        # Создаем новую программу
         db_program = ProgramDB(
             name=name,
-            university_id=uniid,
-            mask_required_all=mask,
-            mask_required_any=0  # Пока игнорируем предметы "OR"
+            mask_required_all=required_all,
+            mask_required_any=required_any,
+            university_id=university_id
         )
         db.add(db_program)
         await db.commit()
@@ -209,17 +211,17 @@ async def get_programs(db: AsyncSession):
 async def update_program(
     db: AsyncSession,
     program_id: int,
-    required_all: List[int] = None,
-    required_any: List[int] = None,
-    university_id: int = None
+    required_all: Optional[int] = None,  # Ждёт именно готовую маску
+    required_any: Optional[int] = None,  # Ждёт именно готовую маску
+    university_id: Optional[int] = None
 ):
     try:
         stmt = update(ProgramDB).where(ProgramDB.id == program_id)
         values = {}
         if required_all is not None:
-            values["mask_required_all"] = make_mask(required_all)
+            values["mask_required_all"] = required_all  # Прямо присваиваем пришедшую маску
         if required_any is not None:
-            values["mask_required_any"] = make_mask(required_any)
+            values["mask_required_any"] = required_any  # Прямо присваиваем пришедшую маску
         if university_id is not None:
             values["university_id"] = university_id
         if not values:
