@@ -80,6 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!data.length) {
                 resultsContainer.innerHTML = "<p>Университеты не найдены</p>";
                 return;
+            } else {
+                console.log("Получены университеты:", data);
             }
 
             const ul = document.createElement("ul");

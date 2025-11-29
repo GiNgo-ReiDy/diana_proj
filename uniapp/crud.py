@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import update
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, func, delete, or_, and_
-from uniapp.models import UniversityDB, ProgramDB
+from uniapp.models import UniversityDB, ProgramDB, SubjectsDB
 from typing import List, Optional
 import logging
 
@@ -36,15 +36,25 @@ async def get_university(
 
         # Фильтр по предметам
         if subjects:
+            # получаем ID предметов
+            subject_ids_stmt = select(SubjectsDB.id).where(SubjectsDB.name.in_(subjects))
+            result = await db.execute(subject_ids_stmt)
+            subject_ids = [row[0] for row in result.all()]
+
+            # строим маску
+            required_mask = 0
+            for sid in subject_ids:
+                required_mask |= (1 << sid)
+
             subjects_stmt = select(ProgramDB.university_id).where(
-                # Ищем хотя бы один совпадающий предмет в required_subjects
-                func.array_to_string(ProgramDB.required_subjects, ',').ilike(
-                    '|'.join([f"%{s}%" for s in subjects])
-                )
+                (ProgramDB.mask_required_all.op("&")(required_mask) == required_mask) |
+                (ProgramDB.mask_required_any.op("&")(required_mask) != 0)
             ).distinct()
+
             result = await db.execute(subjects_stmt)
             subjects_ids = {row[0] for row in result.all() if row[0] is not None}
             university_ids = subjects_ids if university_ids is None else university_ids & subjects_ids
+
 
         # Фильтр по городам
         if cities:
@@ -65,8 +75,7 @@ async def get_university(
         if university_ids is not None:
             stmt = stmt.where(UniversityDB.id.in_(list(university_ids)))
 
-        result = await db.execute(stmt)
-        return result.scalars().all()
+        return result.all()
 
     except Exception as e:
         logger.error(f"Ошибка в get_university: {e}", exc_info=True)
