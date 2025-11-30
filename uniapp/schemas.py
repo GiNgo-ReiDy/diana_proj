@@ -1,5 +1,10 @@
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List
+from pydantic import BaseModel, Field
+
+class SearchUniversitiesRequest(BaseModel):
+    subjects: List[str] = Field(default=[])
+    cities: List[str] = Field(default=[])
+
 
 class Program(BaseModel):
     id: int

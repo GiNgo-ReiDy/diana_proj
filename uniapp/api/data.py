@@ -2,38 +2,27 @@ import logging
 from fastapi import APIRouter, Query, Depends, Body, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from uniapp.crud import get_university, get_universities
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from uniapp.database import get_session
+from uniapp.models import UniversityDB, ProgramDB, SubjectsDB
+from uniapp.schemas import SearchUniversitiesRequest
 
 router = APIRouter()  # ← именно router, а не функция
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@router.get("/get_universities")
-async def api_search_universities(
-    subjects: list[str] | None = Query(None),
-    cities: list[str] | None = Query(None),
-    session: AsyncSession = Depends(get_session)
-):
-    universities = await get_university(session, subjects=subjects, cities=cities)
-    return [
-        {
-            "id": u.id,
-            "name": u.name,
-            "cities": u.cities,
-            "programs": [
-                {
-                    "name": p.name,
-                    "mask_required_all": p.mask_required_all,
-                    "mask_required_any": p.mask_required_any,
-                    "university_id": p.university_id
-                }
-                for p in u.programs
-            ]
-        }
-        for u in universities
-    ]
 
-
+# Основная функция поиска университетов
+@router.post("/search-universities/")
+async def search_universities(request: SearchUniversitiesRequest, session: AsyncSession = Depends(get_session)):
+    """
+    Роутер для поиска университетов и программ по заданным критериям.
+    """
+    logger.debug(f"Received request: {request.dict()}")
+    # Получаем результаты через CRUD-функцию
+    results = await get_university(session, subjects=request.subjects, cities=request.cities)
+    return results
 
 @router.get("/all")
 async def api_get_all_universities(

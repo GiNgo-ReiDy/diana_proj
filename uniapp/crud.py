@@ -23,61 +23,67 @@ async def get_university(
     db: AsyncSession,
     subjects: Optional[List[str]] = None,
     cities: Optional[List[str]] = None
-) -> List[UniversityDB]:
+):
+    """
+    Сервисная функция для поиска университетов и программ по заданным критериям.
+    Возвращает удобный для пользователя результат с расшифрованными предметами.
+    """
     try:
+        # Начало запроса
         stmt = select(UniversityDB).options(selectinload(UniversityDB.programs))
 
-        # Если нет фильтров — вернуть все университеты
-        if not subjects and not cities:
-            result = await db.execute(stmt)
-            return result.scalars().all()
-
-        university_ids: Optional[set[int]] = None
-
-        # Фильтр по предметам
-        if subjects:
-            # получаем ID предметов
-            subject_ids_stmt = select(SubjectsDB.id).where(SubjectsDB.name.in_(subjects))
-            result = await db.execute(subject_ids_stmt)
-            subject_ids = [row[0] for row in result.all()]
-
-            # строим маску
-            required_mask = 0
-            for sid in subject_ids:
-                required_mask |= (1 << sid)
-
-            subjects_stmt = select(ProgramDB.university_id).where(
-                (ProgramDB.mask_required_all.op("&")(required_mask) == required_mask) |
-                (ProgramDB.mask_required_any.op("&")(required_mask) != 0)
-            ).distinct()
-
-            result = await db.execute(subjects_stmt)
-            subjects_ids = {row[0] for row in result.all() if row[0] is not None}
-            university_ids = subjects_ids if university_ids is None else university_ids & subjects_ids
-
-
-        # Фильтр по городам
+        # Фильтрация по городам
         if cities:
-            city_stmt = select(UniversityDB.id).where(
-                func.array_to_string(UniversityDB.cities, ',').ilike(
-                    '|'.join([f"%{c}%" for c in cities])
-                )
+            stmt = stmt.filter(UniversityDB.cities.overlap(cities))
+
+        # Выполняем запрос и получаем уникальные университеты
+        result = await db.execute(stmt)
+        unique_universities = result.scalars().unique().all()
+
+        # Если нет никаких критериев фильтрации — возвращаем все университеты
+        if not subjects and not cities:
+            return unique_universities
+
+        # Фильтрация программ по предметам
+        programs_stmt = select(ProgramDB).where(ProgramDB.university_id.in_([u.id for u in unique_universities]))
+
+        if subjects:
+            # Преобразуем список предметов в битовую маску
+            required_all_mask = subjects_to_mask(subjects)
+
+            # Фильтруем программы по маскам
+            programs_stmt = programs_stmt.filter(
+                (ProgramDB.mask_required_all.op('&')(required_all_mask) == required_all_mask) |  # все обязательные предметы совпадают
+                (ProgramDB.mask_required_any.op('&')(required_all_mask) != 0)                  # хотя бы один факультативный предмет есть
             )
-            result = await db.execute(city_stmt)
-            city_ids = {row[0] for row in result.all() if row[0] is not None}
-            university_ids = city_ids if university_ids is None else university_ids & city_ids
 
-        # Если фильтры применялись, но пересечение пустое
-        if university_ids is not None and not university_ids:
-            return []
+        # Выполняем запрос и получаем программы
+        programs_result = await db.execute(programs_stmt)
+        filtered_programs = programs_result.scalars().all()
 
-        # Применяем фильтр по найденным id
-        if university_ids is not None:
-            stmt = stmt.where(UniversityDB.id.in_(list(university_ids)))
+        # Готовим результат с удобным представлением предметов
+        results = {}
+        for program in filtered_programs:
+            university_name = next(u.name for u in unique_universities if u.id == program.university_id)
+            if university_name not in results:
+                results[university_name] = {
+                    "cities": program.university.cities,
+                    "programs": []
+                }
+            # Расшифровка битовых масок в названия предметов
+            required_all_names = ", ".join(mask_to_subjects(program.mask_required_all))
+            required_any_names = ", ".join(mask_to_subjects(program.mask_required_any))
 
-        return result.all()
+            results[university_name]["programs"].append({
+                "id": program.id,
+                "name": program.name,
+                "required_all": required_all_names,
+                "required_any": required_any_names
+            })
 
+        return results
     except Exception as e:
+        await db.rollback()
         logger.error(f"Ошибка в get_university: {e}", exc_info=True)
         raise
 
@@ -147,21 +153,21 @@ async def get_university_by_id(db: AsyncSession, university_id: int):
 # Функции для программ
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from uniapp.models import ProgramDB
+
 
 # Битовые маски для предметов
 SUBJECTS = {
-    "биология": 1 << 0,
-    "география": 1 << 1,
-    "иностранный язык": 1 << 2,
-    "информатика": 1 << 3,
-    "история": 1 << 4,
-    "литература": 1 << 5,
-    "профильная математика": 1 << 6,
-    "обществознание": 1 << 7,
-    "русский язык": 1 << 8,
-    "физика": 1 << 9,
-    "химия": 1 << 10,
+    "Биология": 1 << 0,
+    "География": 1 << 1,
+    "Иностранный язык": 1 << 2,
+    "Информатика и ИКТ": 1 << 3,
+    "История": 1 << 4,
+    "Литература": 1 << 5,
+    "Профильная математика": 1 << 6,
+    "Обществознание": 1 << 7,
+    "Русский язык": 1 << 8,
+    "Физика": 1 << 9,
+    "Химия": 1 << 10,
 }
 
 def subjects_to_mask(subject_list: list[str]) -> int:
