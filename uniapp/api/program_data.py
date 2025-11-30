@@ -18,6 +18,7 @@ async def api_get_all_programs(session: AsyncSession = Depends(get_session)):
             "name": p.name,
             "mask_required_all": p.mask_required_all,
             "mask_required_any": p.mask_required_any,
+            "program_url": p.program_url,
             "university_id": p.university_id
         } for p in programs
     ]
@@ -27,6 +28,7 @@ class ProgramCreate(BaseModel):
     name: str
     required_all: int  # Битовая маска обязательных предметов
     required_any: int  # Битовая маска факультативных предметов
+    program_url: str
     university_id: int
 
 @router.post("/add")
@@ -44,6 +46,7 @@ async def api_add_program(
         name=payload.name,
         required_all=payload.required_all,
         required_any=payload.required_any,
+        program_url=payload.program_url,
         university_id=payload.university_id
     )
 
@@ -52,6 +55,7 @@ async def api_add_program(
         "name": program.name,
         "mask_required_all": program.mask_required_all,
         "mask_required_any": program.mask_required_any,
+        "program_url":program.program_url,
         "university_id": program.university_id
     }
 

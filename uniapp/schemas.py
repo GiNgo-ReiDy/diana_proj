@@ -12,7 +12,7 @@ class Program(BaseModel):
     # university_id = Column(Integer, ForeignKey('university.id'))  # Ваш случай!
     mask_required_all: int
     mask_required_any: int
-
+    program_url : str
     class Config:
         from_attributes = True
 

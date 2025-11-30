@@ -78,7 +78,8 @@ async def get_university(
                 "id": program.id,
                 "name": program.name,
                 "required_all": required_all_names,
-                "required_any": required_any_names
+                "required_any": required_any_names,
+                "program_url": program.program_url
             })
 
         return results
@@ -189,6 +190,7 @@ async def add_program(
     name: str,
     required_all: int,
     required_any: int,
+    program_url: str,
     university_id: int
 ):
     try:
@@ -197,6 +199,7 @@ async def add_program(
             name=name,
             mask_required_all=required_all,
             mask_required_any=required_any,
+            program_url=program_url,
             university_id=university_id
         )
         db.add(db_program)

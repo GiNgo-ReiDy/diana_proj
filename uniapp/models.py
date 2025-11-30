@@ -19,9 +19,10 @@ class ProgramDB(Base):
     id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String)
     university_id = mapped_column(Integer, ForeignKey("university.id"))
+
     mask_required_all = mapped_column(Integer)
     mask_required_any = mapped_column(Integer)
-
+    program_url = mapped_column(String)
     university = relationship("UniversityDB", back_populates="programs")
 
 

@@ -164,6 +164,7 @@ function renderTablePr(programs) {
             <td>${prog.id}</td>
             <td>${prog.name}</td>
             <td>Обязательно: ${requiredAllSubjects}<br />Дополнительно: ${requiredAnySubjects}</td>
+            <td>${prog.program_url}</td>
             <td>${prog.university_id}</td>
             <td class="actions">
                 <button class="edit-btn" onclick="editProgram(${prog.id})">Редактировать</button>
@@ -373,6 +374,7 @@ function showAddFormPr() {
             <input type="text" id="newPrName" placeholder="Название программы" required>
             <input type="text" id="newPrReqSubjects" placeholder="Обязательные предметы" required>
             <input type="text" id="newPrOptSubjects" placeholder="Факультативные предметы" required>
+            <input type="text" id="newPrUrl" placeholder="Ссылка на образовательную программу" required>
             <input type="text" id="newPrUniId" placeholder="ID вуза" required>
             <button id="submitAdd">Добавить</button>
             <button id="cancelAdd">Отмена</button>
@@ -390,6 +392,7 @@ async function addProgram() {
     const name = document.getElementById("newPrName").value.trim();
     const reqSubjectsRaw = document.getElementById("newPrReqSubjects").value || '';
     const optSubjectsRaw = document.getElementById("newPrOptSubjects").value || '';
+    const prUrl = document.getElementById("newPrUrl").value.trim();
     const university_id = parseInt(document.getElementById("newPrUniId").value.trim());
 
     // Нормализуем и обрабатываем данные
@@ -403,6 +406,10 @@ async function addProgram() {
     }
     if (!normalizedReqSubjects.length && !normalizedOptSubjects.length) {
         alert("Необходимо указать хотя бы один предмет (обязательный или факультативный)");
+        return;
+    }
+    if (!prUrl){
+        alert("Нужно указать ссылку на сайт программы")
         return;
     }
     if (!university_id) {
@@ -419,6 +426,7 @@ async function addProgram() {
         name: name,
         required_all: requiredSubjectsBitmask,
         required_any: optionalSubjectsBitmask,
+        program_url: prUrl,
         university_id: university_id
     };
 
