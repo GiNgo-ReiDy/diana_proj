@@ -371,10 +371,8 @@ function showAddFormPr() {
     const formHtml = `
         <div id="addFormContainer" style="margin: 20px 0;">
             <input type="text" id="newPrName" placeholder="Название программы" required>
-            <label for="newPrReqSubjects">Обязательные предметы (через запятую)</label>
-            <textarea id="newPrReqSubjects" rows="2" cols="50" required></textarea>
-            <label for="newPrOptSubjects">Факультативные предметы (через запятую)</label>
-            <textarea id="newPrOptSubjects" rows="2" cols="50"></textarea>
+            <input type="text" id="newPrReqSubjects" placeholder="Обязательные предметы" required>
+            <input type="text" id="newPrOptSubjects" placeholder="Факультативные предметы" required>
             <input type="text" id="newPrUniId" placeholder="ID вуза" required>
             <button id="submitAdd">Добавить</button>
             <button id="cancelAdd">Отмена</button>
