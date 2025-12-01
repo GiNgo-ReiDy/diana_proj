@@ -73,31 +73,19 @@ async def api_update_program(
     program_id: int,
     required_all: int = Body(None),
     required_any: int = Body(None),
+    program_url: str = Body(None),
     university_id: int = Body(None),
     session: AsyncSession = Depends(get_session)
 ):
-    program = await update_program(session, program_id, required_all, required_any, university_id)
+    program = await update_program(session, program_id, required_all, required_any, program_url, university_id)
     if program is None:
         raise HTTPException(status_code=404, detail=f"Программа {program_id} не найдена.")
     return {
         "id": program.id,
         "mask_required_all": program.mask_required_all,
         "mask_required_any": program.mask_required_any,
+        "program_url":program.program_url,
         "university_id": program.university_id
     }
 
-# ---- POST фильтр по предметам ----
-# @router.post("/filter")
-# async def api_filter_programs(subject_ids: List[int] = Body(...), session: AsyncSession = Depends(get_session)):
-#     from uniapp.crud import make_mask
-#     user_mask = make_mask(subject_ids)
-#     programs = await filter_programs(session, user_mask)
-#     return [
-#         {
-#             "id": p.id,
-#             "name": p.name,
-#             "mask_required_all": p.mask_required_all,
-#             "mask_required_any": p.mask_required_any,
-#             "university_id": p.university_id
-#         } for p in programs
-#     ]
+

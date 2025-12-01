@@ -240,6 +240,9 @@ function createModalWindowProgram(programID){
                 <!-- Поле для университета -->
                 <label for="programUni">ID университета:</label><br />
                 <textarea id="programUni" rows="2" cols="50"></textarea><br /><br />
+                
+                <label for="programUrl">Ссылка на программу</label><br />
+                <textarea id="programUrl" rows="2" cols="50"></textarea><br /><br />
                 <button type="button" onclick="saveEditedProgram(${programID})">Сохранить изменения</button>
             </form>
         </div>
@@ -255,6 +258,7 @@ async function saveEditedProgram(programID) {
     // Получаем данные из формы
     const requiredSubjectsRaw = document.getElementById('requiredSubjects').value || ''; // Обязательные предметы
     const optionalSubjectsRaw = document.getElementById('optionalSubjects').value || ''; // Факультативные предметы
+    const programUrl = document.getElementById('programUrl').value.trim();
     const universityID = document.getElementById('programUni').value.trim();
 
     // Нормализуем и собираем данные
@@ -272,6 +276,11 @@ async function saveEditedProgram(programID) {
         return;
     }
 
+    if (!programUrl) {
+        alert("Введите ссылку на проограмму университета");
+        return;
+    }
+
     // Преобразуем массивы предметов в битовые маски
     const requiredSubjectsBitmask = convertSubjectsToBitmask(normalizedRequiredSubjects);
     const optionalSubjectsBitmask = convertSubjectsToBitmask(normalizedOptionalSubjects);
@@ -280,6 +289,7 @@ async function saveEditedProgram(programID) {
     const updatedData = {
         required_all: requiredSubjectsBitmask,
         required_any: optionalSubjectsBitmask,
+        program_url: programUrl,
         university_id: parseInt(universityID)
     };
 

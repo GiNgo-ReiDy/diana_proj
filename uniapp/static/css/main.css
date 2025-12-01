@@ -93,6 +93,12 @@ main {
     overflow-y: auto;
 }
 
+/* Выделение пункта при наведении */
+.dropdown-list li:hover {
+    background-color: #e6e6e6;
+}
+
+
 .hidden {
     display: none;
 }
@@ -112,6 +118,7 @@ main {
 .btn-search:hover{
     background: #FF5733;
 }
+
 
 .error-box {
     margin-top: 15px;

@@ -222,6 +222,7 @@ async def update_program(
     program_id: int,
     required_all: Optional[int] = None,  # Ждёт именно готовую маску
     required_any: Optional[int] = None,  # Ждёт именно готовую маску
+    program_url: Optional[str] = None,
     university_id: Optional[int] = None
 ):
     try:
@@ -233,6 +234,8 @@ async def update_program(
             values["mask_required_any"] = required_any  # Прямо присваиваем пришедшую маску
         if university_id is not None:
             values["university_id"] = university_id
+        if program_url is not None:
+            values["program_url"] = program_url
         if not values:
             return None
         stmt = stmt.values(**values).returning(ProgramDB)

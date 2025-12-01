@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("#search-form");
     const resultsContainer = document.querySelector("#results");
-    const btnSearch = document.querySelector('.btn-search');
+    const subjectsbtn = document.querySelector('.subjects-btn');
+    const citiesbtn = document.querySelector('.cities-btn');
     const errorBox = document.querySelector("#error-box");
     const citiesList = document.querySelector(".cities-list");
     const citiesLabel = document.querySelector(".cities-label");
@@ -35,6 +36,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     return subjects;
 }
+    function toggleArrowSubj() {
+        if (subjectsbtn.textContent === '▼') {
+            subjectsbtn.textContent = '▲'; // Меняем направление стрелочки вверх
+        } else {
+            subjectsbtn.textContent = '▼'; // Возвращаемся обратно
+        }
+    }
+    subjectsbtn.addEventListener('click', toggleArrowSubj);
+
+    function toggleArrowCities() {
+        if (citiesbtn.textContent === '▼') {
+            citiesbtn.textContent = '▲'; // Меняем направление стрелочки вверх
+        } else {
+            citiesbtn.textContent = '▼'; // Возвращаемся обратно
+        }
+    }
+    citiesbtn.addEventListener('click', toggleArrowCities);
 
     function renderCities(country) {
         citiesList.innerHTML = "";
@@ -92,6 +110,11 @@ form.addEventListener("submit", async (event) => {
     errorBox.style.display = "none";
     errorBox.textContent = "";
 
+    if (selectedSubjects.length === 0 && selectedCities.length === 0) {
+        alert("Нужно выбрать хотя бы один предмет или город.");
+        return;
+    }
+
     try {
         // Используем POST-запрос для отправки данных
         const response = await fetch("/api/universities/search-universities/", {
@@ -119,8 +142,28 @@ form.addEventListener("submit", async (event) => {
                 const subUl = document.createElement("ul");
                 details.programs.forEach(program => {
                     const subLi = document.createElement("li");
-                    subLi.textContent = `Программа: ${program.name} | Требования: ${program.required_all}, ${program.required_any}`;
-                    subUl.appendChild(subLi);
+
+                    const linkButton = document.createElement('a');
+                    linkButton.href = program.program_url; // Ваша ссылка из базы данных
+                    linkButton.target = "_blank";
+                    linkButton.classList.add('btn-programurl');
+                    linkButton.textContent = 'Перейти на эту программу';
+
+                     let requirementsText = '';
+                        if (program.required_all || program.required_any) {
+                            requirementsText = `Требования: ${program.required_all ? `${program.required_all}` : ''}${program.required_all && program.required_any ? ', ' : ''}${program.required_any ? `${program.required_any}` : ''}`;
+                        }
+
+                        // Финальный HTML
+                        subLi.innerHTML = `
+                            Программа: ${program.name}<br />
+                            ${requirementsText}
+                            <div style="margin-top: 8px;">${linkButton.outerHTML}</div>
+                        `;
+                        subUl.appendChild(subLi);
+
+                    // subLi.textContent = `Программа: ${program.name} | Требования: ${program.required_all}, ${program.required_any}`;
+                    // subUl.appendChild(subLi);
                 });
                 li.appendChild(subUl);
             }

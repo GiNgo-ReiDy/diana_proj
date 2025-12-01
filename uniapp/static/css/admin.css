@@ -62,13 +62,23 @@ th {
             background: #007bff;
             color: white;
             margin-top: 5px;
+            transition: box-shadow 3.15s ease-out;
         }
-
+.edit-btn:hover{
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: #0057b8;
+}
 .delete-btn {
             background: #dc3545;
             color: white;
             margin-top: 5px;
+            transition: box-shadow 3.15s ease-out;
         }
+
+.delete-btn:hover{
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: #b81f2e;
+}
 
 /* Модальное окно */
 .modal-container {
