@@ -82,6 +82,10 @@ main {
     cursor: pointer;
 }
 
+.btn-dropdown:hover{
+    color: #999999;
+}
+
 .dropdown-list {
     list-style: none;
     padding: 10px;
@@ -103,6 +107,24 @@ main {
     display: none;
 }
 
+/* Базовые стили */
+.btn-programurl {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #0057b8; /* синий фон */
+    border-radius: 5px;
+    text-decoration: none;
+
+}
+
+/* Стили при наведении мыши */
+.btn-programurl:hover {
+    background: #FF5733;
+}
+
+
 .btn-search {
     width: 100%;
     padding: 12px;
@@ -112,12 +134,13 @@ main {
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: color 0.3s ease-in-out;
+
 }
 
 .btn-search:hover{
     background: #FF5733;
 }
+
 
 
 .error-box {
