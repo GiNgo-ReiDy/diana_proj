@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const cities = {
         "КНР": ["Сычуань", "Пекин", "Харбин", "Синьчжу", "Шанхай", "Тяньцзинь", "Ухань", "Чунцин", "Гуанси", "Сиань", "Хейлунцзян", "Гуанчжоу", "Гонконг", "Шэньчжэнь", "Нанкин", "Хунань", "Далянь", "Наньчан", "Шаньдунь", "Чанчунь", "Ляонин"],
-        "РФ": ["Москва", "Санкт-Петербург", "Новосибирск", "Казань", "Екатеринбург", "Нижний Новгород", "Самара", "Воронеж", "Красноярск", "Пермь", "Челябинск", "Омск", "Ростов-на-Дону", "Уфа", "Волгоград", "Краснодар"]
+        "РФ": ["Москва", "Санкт-Петербург", "Новосибирск", "Казань", "Нижний Новгород", "Воронеж", "Пермь", "Челябинск", "Омск", "Уфа", "Волгоград", "Сочи", "Астрахань", "Мурманск"]
     };
     function maskToSubjects(mask) {
     const SUBJECTS_BITS = {
@@ -149,10 +149,13 @@ form.addEventListener("submit", async (event) => {
                     linkButton.classList.add('btn-programurl');
                     linkButton.textContent = 'Перейти на эту программу';
 
-                     let requirementsText = '';
-                        if (program.required_all || program.required_any) {
-                            requirementsText = `Требования: ${program.required_all ? `${program.required_all}` : ''}${program.required_all && program.required_any ? ', ' : ''}${program.required_any ? `${program.required_any}` : ''}`;
-                        }
+                    let requirementsText = '';
+                    if (program.required_all || program.required_any) {
+                        const requiredAllStr = program.required_all ? `Обязательные предметы: ${program.required_all}<br>` : '';
+                        const requiredAnyStr = program.required_any ? `Предметы по выбору: ${program.required_any.split(',').join('/')}` : '';
+
+                        requirementsText = `${requiredAllStr}${requiredAnyStr}`;
+                    }
 
                         // Финальный HTML
                         subLi.innerHTML = `

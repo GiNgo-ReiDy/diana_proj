@@ -20,48 +20,48 @@ async def get_universities(db: AsyncSession, skip: int = 0, limit: int = 100):
 
 
 async def get_university(
-    db: AsyncSession,
-    subjects: Optional[List[str]] = None,
-    cities: Optional[List[str]] = None
+        db: AsyncSession,
+        subjects: Optional[List[str]] = None,
+        cities: Optional[List[str]] = None
 ):
     """
     Сервисная функция для поиска университетов и программ по заданным критериям.
     Возвращает удобный для пользователя результат с расшифрованными предметами.
     """
     try:
-        # Начало запроса
+        # Начинаем построение основного SQL-запроса
         stmt = select(UniversityDB).options(selectinload(UniversityDB.programs))
 
         # Фильтрация по городам
         if cities:
             stmt = stmt.filter(UniversityDB.cities.overlap(cities))
 
-        # Выполняем запрос и получаем уникальные университеты
+        # Получаем уникальные университеты
         result = await db.execute(stmt)
         unique_universities = result.scalars().unique().all()
 
-        # Если нет никаких критериев фильтрации — возвращаем все университеты
+        # Если нет критериев фильтрации — вернуть все университеты
         if not subjects and not cities:
             return unique_universities
 
-        # Фильтрация программ по предметам
+        # Подготавливаем фильтр программ по предметам
         programs_stmt = select(ProgramDB).where(ProgramDB.university_id.in_([u.id for u in unique_universities]))
 
         if subjects:
-            # Преобразуем список предметов в битовую маску
-            required_all_mask = subjects_to_mask(subjects)
+            # Преобразуем введённые предметы в битовую маску
+            user_subjects_mask = subjects_to_mask(subjects)
 
-            # Фильтруем программы по маскам
+            # Проверяем, что выбранные предметы присутствуют либо среди обязательных, либо среди дополнительных
             programs_stmt = programs_stmt.filter(
-                (ProgramDB.mask_required_all.op('&')(required_all_mask) == required_all_mask) |  # все обязательные предметы совпадают
-                (ProgramDB.mask_required_any.op('&')(required_all_mask) != 0)                  # хотя бы один факультативный предмет есть
+                ((ProgramDB.mask_required_all.op('|')(ProgramDB.mask_required_any)).op('&')(
+                    user_subjects_mask)) == user_subjects_mask
             )
 
-        # Выполняем запрос и получаем программы
+        # Запрашиваем подходящие программы
         programs_result = await db.execute(programs_stmt)
         filtered_programs = programs_result.scalars().all()
 
-        # Готовим результат с удобным представлением предметов
+        # Формируем результирующие данные
         results = {}
         for program in filtered_programs:
             university_name = next(u.name for u in unique_universities if u.id == program.university_id)
@@ -70,7 +70,8 @@ async def get_university(
                     "cities": program.university.cities,
                     "programs": []
                 }
-            # Расшифровка битовых масок в названия предметов
+
+            # Конвертируем маски в удобочитаемые списки предметов
             required_all_names = ", ".join(mask_to_subjects(program.mask_required_all))
             required_any_names = ", ".join(mask_to_subjects(program.mask_required_any))
 
