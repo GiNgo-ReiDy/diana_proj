@@ -140,39 +140,59 @@ form.addEventListener("submit", async (event) => {
 
             if (details.programs && details.programs.length) {
                 const subUl = document.createElement("ul");
+
                 details.programs.forEach(program => {
                     const subLi = document.createElement("li");
 
                     const linkButton = document.createElement('a');
-                    linkButton.href = program.program_url; // Ваша ссылка из базы данных
+                    linkButton.href = program.program_url;
                     linkButton.target = "_blank";
                     linkButton.classList.add('btn-programurl');
-                    linkButton.textContent = 'Перейти на эту программу';
+                    linkButton.textContent = 'Перейти на программу';
 
                     let requirementsText = '';
                     if (program.required_all || program.required_any) {
-                        const requiredAllStr = program.required_all ? `Обязательные предметы: ${program.required_all}<br>` : '';
-                        const requiredAnyStr = program.required_any ? `Предметы по выбору: ${program.required_any.split(',').join('/')}` : '';
+                        const requiredAllStr = program.required_all
+                            ? `Обязательные предметы: ${program.required_all}<br>`
+                            : '';
+                        const requiredAnyStr = program.required_any
+                            ? `Предметы по выбору: ${program.required_any.split(',').join('/')}`
+                            : '';
 
                         requirementsText = `${requiredAllStr}${requiredAnyStr}`;
                     }
 
-                        // Финальный HTML
-                        subLi.innerHTML = `
-                            Программа: ${program.name}<br />
-                            ${requirementsText}
-                            <div style="margin-top: 8px;">${linkButton.outerHTML}</div>
-                        `;
-                        subUl.appendChild(subLi);
+                    // Финальный HTML
+                    subLi.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:#0066cc; font-weight:600; font-size:32px;">
+                                ${program.name}
+                            </span>
 
-                    // subLi.textContent = `Программа: ${program.name} | Требования: ${program.required_all}, ${program.required_any}`;
-                    // subUl.appendChild(subLi);
+                            <a href="${program.program_url}" 
+                            target="_blank" 
+                            class="btn-programurl" 
+                            style="margin-left:10px;">
+                                Перейти на программу
+                            </a>
+                        </div>
+
+                        <div style="margin-top:8px;">
+                            ${requirementsText}
+                        </div>
+                    `;
+
+                    subUl.appendChild(subLi);
                 });
+
                 li.appendChild(subUl);
             }
+
             ul.appendChild(li);
         });
+
         resultsContainer.appendChild(ul);
+
 
     } catch (err) {
         errorBox.style.display = "block";
