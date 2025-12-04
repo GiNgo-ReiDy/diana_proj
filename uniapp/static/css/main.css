@@ -34,7 +34,7 @@ nav a {
 }
 
 nav a:hover {
-    color: #FF5733; /* Новый цвет при наведении */
+    color: #ff6d2b; /* Новый цвет при наведении */
     cursor: pointer; /* Показываем курсор указательного пальца */
 }
 
@@ -108,22 +108,6 @@ main {
     display: none;
 }
 
-/* Базовые стили */
-.btn-programurl {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #0057b8; /* синий фон */
-    border-radius: 5px;
-    text-decoration: none;
-
-}
-
-/* Стили при наведении мыши */
-.btn-programurl:hover {
-    background: #FF5733;
-}
 
 
 .btn-search {
@@ -139,7 +123,7 @@ main {
 }
 
 .btn-search:hover{
-    background: #FF5733;
+    background: #fc89ac;
 }
 
 
@@ -173,13 +157,106 @@ main {
 
 #results li {
     padding: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     background: #f0f6ff;
     border-radius: 10px;
 }
 
 #results li ul {
     margin-top: 8px;
+}
+.university-item {
+    margin-bottom: 20px;
+    position: relative;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.city-list {
+    color: #777;
+    font-size: 0.9em;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Структура списка программ */
+.program-list {
+    margin-top: 10px;
+    padding-left: 0;
+    list-style: none;
+}
+
+.program-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.program-item:last-child {
+    border-bottom: none;
+}
+
+.program-item:hover {
+    background-color: #fafafa;
+}
+
+/* Информация о программах */
+.program-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.program-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+}
+
+.requirements-text {
+    font-size: 14px;
+    color: #555;
+    margin-top: 5px;
+}
+
+.university-name{
+    font-size:16px;
+}
+
+
+/* Название программы становится активной ссылкой */
+/* Основной стиль ссылки */
+.program-link {
+    font-size: 1.2em;          /* Увеличение размера текста */
+    font-weight: bold;
+    color: #007BFF;           /* Начальный цвет ссылки */
+    text-decoration: none; /* Подчеркивание ссылки */
+    cursor: pointer;           /* Курсор для настольных устройств */
+    transition: color 0.3s ease-in-out; /* Переходы цвета */
+    outline: none;              /* Убираем стандартный контур */
+}
+
+/* Эффект при наведении на компьютеры с мышью */
+.program-link:hover {
+    color: #ff6d2b;           /* Цвет при наведении */
+}
+
+/* Эффект при нажатии на телефон (активное состояние) */
+.program-link:active {
+    color: #ff6d2b;           /* Цвет при нажатии */
+}
+
+/* Фокусировка при выделении клавиатурой */
+.program-link:focus {
+    color: #ff6d2b;           /* Цвет при фокусировке */
+}
+
+/* Удаляем нестандартное поведение фона при фокусе в Firefox */
+.program-link::-moz-focus-inner {
+    border: 0;
 }
 
 /* Переключатель стран */
@@ -291,6 +368,12 @@ input:checked + .slider:before {
     .country-switch {
         flex-wrap: wrap;
     }
+    .requirements-text{
+        font-size: 12px;
+    }
+    .university-name{
+    font-size:14px;
+    }
 }
 
 @media screen and (min-width: 601px) and (max-width: 1024px) {
@@ -309,6 +392,12 @@ input:checked + .slider:before {
     .search-panel,
     .results-panel {
         width: 80%; /* Гибкая ширина */
+    }
+    .requirements-text{
+        font-size: 14px;
+    }
+    .university-name{
+    font-size:14px;
     }
 }
 
@@ -333,4 +422,10 @@ input:checked + .slider:before {
     .results-panel {
         width: 90%; /* Панели растягиваются до максимальной доступной ширины */
     }
+    .requirements-text{
+        font-size: 18px;
+    }
+    .university-name{
+    font-size:18px;
+}
 }

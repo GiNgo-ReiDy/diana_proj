@@ -134,62 +134,57 @@ form.addEventListener("submit", async (event) => {
 
         // Генерируем список результатов
         const ul = document.createElement("ul");
-        Object.entries(data).forEach(([universityName, details]) => {
-            const li = document.createElement("li");
-            li.innerHTML = `<strong>${universityName}</strong> <br><small>Города: ${details.cities.join(", ")}</small>`;
+Object.entries(data).forEach(([universityName, details]) => {
+    const li = document.createElement("li");
+    li.classList.add('university-item');
 
-            if (details.programs && details.programs.length) {
-                const subUl = document.createElement("ul");
+    li.innerHTML = `
+        <strong class="university-name">${universityName}</strong> 
+        <br><small class="city-list">Города: ${details.cities.join(", ")}</small> 
+    `;
 
-                details.programs.forEach(program => {
-                    const subLi = document.createElement("li");
+    if (details.programs && details.programs.length) {
+        const subUl = document.createElement("ul");
+        subUl.classList.add('program-list');
 
-                    const linkButton = document.createElement('a');
-                    linkButton.href = program.program_url;
-                    linkButton.target = "_blank";
-                    linkButton.classList.add('btn-programurl');
-                    linkButton.textContent = 'Перейти на программу';
+        details.programs.forEach(program => {
+            const subLi = document.createElement("li");
+            subLi.classList.add('program-item');
 
-                    let requirementsText = '';
-                    if (program.required_all || program.required_any) {
-                        const requiredAllStr = program.required_all
-                            ? `Обязательные предметы: ${program.required_all}<br>`
-                            : '';
-                        const requiredAnyStr = program.required_any
-                            ? `Предметы по выбору: ${program.required_any.split(',').join('/')}`
-                            : '';
+            // Создаем элемент anchor (<a>) для названия программы
+            const programLink = document.createElement('a');
+            programLink.href = program.program_url;
+            programLink.target = "_blank";
+            programLink.classList.add('program-link');
+            programLink.textContent = program.name;
 
-                        requirementsText = `${requiredAllStr}${requiredAnyStr}`;
-                    }
+            let requirementsText = '';
+            if (program.required_all || program.required_any) {
+                const requiredAllStr = program.required_all
+                    ? `Обязательные предметы: ${program.required_all}<br>`
+                    : '';
+                const requiredAnyStr = program.required_any
+                    ? `Предметы по выбору: ${program.required_any.split(',').join('/')}`
+                    : '';
 
-                    // Финальный HTML
-                    subLi.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="color:#0066cc; font-weight:600; font-size:32px;">
-                                ${program.name}
-                            </span>
-
-                            <a href="${program.program_url}" 
-                            target="_blank" 
-                            class="btn-programurl" 
-                            style="margin-left:10px;">
-                                Перейти на программу
-                            </a>
-                        </div>
-
-                        <div style="margin-top:8px;">
-                            ${requirementsText}
-                        </div>
-                    `;
-
-                    subUl.appendChild(subLi);
-                });
-
-                li.appendChild(subUl);
+                requirementsText = `${requiredAllStr}${requiredAnyStr}`;
             }
 
-            ul.appendChild(li);
+            subLi.innerHTML = `
+                <div class="program-info">
+                    ${programLink.outerHTML}
+                </div>
+                <p class="requirements-text">${requirementsText}</p>
+            `;
+
+            subUl.appendChild(subLi);
         });
+
+        li.appendChild(subUl);
+    }
+
+    ul.appendChild(li);
+});
 
         resultsContainer.appendChild(ul);
 
