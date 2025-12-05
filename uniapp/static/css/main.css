@@ -2,43 +2,61 @@
 
 /* Светлая тема (по твоему первому CSS) */
 :root {
-    --bg-color: #f5f5f5;
-    --panel-bg: #ffffff;
-    --header-bg: #0057b8;
-    --header-color: #ffffff;
-    --text-color: #333333;
-    --secondary-text: #555555;
-    --link-color: #007BFF;
-    --link-hover-color: #ff6d2b;
-    --dropdown-bg: #fff;
-    --dropdown-hover: #e6e6e6;
-    --card-bg: #fff;
-    --card-alt-bg: #f0f6ff;
-    --error-bg: #ffdddd;
-    --error-border: red;
-    --dropdown-header-bg: #e8e8e8;
-    --btn-bg: #0057b8;
-    --btn-hover: #fc89ac;
+    --bg-color: #FAFAFA;                     /* Очень светлый фон */
+    --panel-bg: #FFFFFF;                     /* Полностью белая панель */
+    --header-bg: #7E57C2;                   /* Градиент глубокий фиолетовый */
+    --header-color: #FFFFFF;                 /* Белый текст заголовка */
+    --text-color: #333333;                   /* Классический чёрный текст */
+    --secondary-text: #757575;               /* Умеренно-темный серый */
+    --link-color: #AB47BC;                   /* Фиолетовый цвет ссылок */
+    --link-hover-color: #7E57C2;             /* Изменение цвета ссылок при наведении */
+    --dropdown-bg: #FFFFFF;                  /* Чисто белый фон для выпадающих меню */
+    --dropdown-hover: #EDEDED;               /* Лёгкая тень при наведении */
+    --card-bg: #FFFFFF;                      /* Белая подложка карточек */
+    --card-alt-bg: #ECEFF1;                  /* Альтернативный фон карточек */
+    --error-bg: #FFDDDD;                     /* Нежно-розовый фон ошибок */
+    --error-border: #D32F2F;                 /* Граница ошибок красная */
+    --dropdown-header-bg: #ECEFF1;           /* Штриховка шапки списка */
+    --btn-bg: #AB47BC;                       /* Основная кнопка фиолетовая */
+    --btn-hover: #7E57C2;                    /* Меняется на насыщенный фиолетовый при наведении */
 }
-
-/* Темная тема */
 [data-theme="dark"] {
-    --bg-color: #1A1C24;
-    --panel-bg: #2A2C36;
-    --header-bg: #22242D;
-    --header-color: #E0E2E6;
-    --text-color: #D1D4DA;
-    --secondary-text: #A3B0C3;
-    --link-color: #5A82A8;
-    --link-hover-color: #7EA4C7;
-    --dropdown-bg: #2A2C36;
-    --dropdown-hover: #343640;
-    --card-bg: #343640;
-    --card-alt-bg: #343640;
-    --error-bg: #4A1E1E;
-    --error-border: #B24C4C;
-    --dropdown-header-bg: #22242D;
+    --bg-color: #2A2A2A;                     /* Более светлый оттенок черного фона */
+    --panel-bg: #343434;                     /* Немного светлее панели */
+    --header-bg: #7E57C2;                   /* Все тот же насыщенный фиолетовый */
+    --header-color: #EBEBEB;                 /* Светлый текст заголовков */
+    --text-color: #BBBBBB;                   /* Немного осветляем основной текст */
+    --secondary-text: #757575;               /* Средний серый вторичный текст */
+    --link-color: #AB47BC;                   /* Оставляем привычный фиолетовый цвет ссылок */
+    --link-hover-color: #7E57C2;             /* Изменяем цвет ссылок при наведении */
+    --dropdown-bg: #343434;                  /* Основание для выпадающих меню */
+    --dropdown-hover: #444444;               /* Немного ярче при наведении */
+    --card-bg: #444444;                      /* Немного светлее карты */
+    --card-alt-bg: #343434;                  /* Альтернативный фон */
+    --error-bg: #4A1E1E;                     /* Остается прежним бордовым */
+    --error-border: #EF5350;                 /* Красный контур ошибок */
+    --dropdown-header-bg: #444444;           /* Средняя интенсивность фона шапки */
+    --btn-bg: #AB47BC;                       /* Главный цвет кнопок остаётся фиолетовым */
+    --btn-hover: #7E57C2;                    /* При наведении появляется более насыщенный оттенок */
 }
+/*!* Темная тема *!*/
+/*[data-theme="dark"] {*/
+/*    --bg-color: #1A1C24;*/
+/*    --panel-bg: #2A2C36;*/
+/*    --header-bg: #22242D;*/
+/*    --header-color: #E0E2E6;*/
+/*    --text-color: #D1D4DA;*/
+/*    --secondary-text: #A3B0C3;*/
+/*    --link-color: #5A82A8;*/
+/*    --link-hover-color: #7EA4C7;*/
+/*    --dropdown-bg: #2A2C36;*/
+/*    --dropdown-hover: #343640;*/
+/*    --card-bg: #343640;*/
+/*    --card-alt-bg: #343640;*/
+/*    --error-bg: #4A1E1E;*/
+/*    --error-border: #B24C4C;*/
+/*    --dropdown-header-bg: #22242D;*/
+/*}*/
 
 /* ================== Основной CSS ================== */
 
@@ -317,7 +335,7 @@ main {
 }
 
 input:checked + .slider {
-    background-color: #2196F3;
+    background-color: #7E57C2;
 }
 
 input:checked + .slider:before {
@@ -352,6 +370,12 @@ input:checked + .slider:before {
     .search-panel, .results-panel { width: 75%; }
     .requirements-text{ font-size: 12px; }
     .university-name{ font-size:14px; }
+        .theme-switch {
+        position: fixed; /* Используем фиксированное позиционирование */
+        bottom: -10px;    /* Располагаем кнопку снизу страницы */
+        left: 50%;
+
+    }
 }
 
 @media screen and (min-width: 601px) and (max-width: 1024px) {
@@ -359,6 +383,11 @@ input:checked + .slider:before {
     .search-panel, .results-panel { width: 80%; }
     .requirements-text{ font-size: 14px; }
     .university-name{ font-size:14px; }
+        .theme-switch {
+        position: absolute; /* Абсолютное позиционирование */
+        bottom: 40px;       /* Немного сдвинем кнопку ближе к низу */
+        right: 20px;        /* Отодвигаем от правого края */
+    }
 }
 
 @media screen and (min-width: 1025px) {
@@ -366,4 +395,5 @@ input:checked + .slider:before {
     .search-panel, .results-panel { width: 90%; }
     .requirements-text{ font-size: 18px; }
     .university-name{ font-size:18px; }
+
 }
