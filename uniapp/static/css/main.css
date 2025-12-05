@@ -1,56 +1,100 @@
-/*/* Основной CSS-код */
+/* ================== CSS ПЕРЕМЕННЫЕ ================== */
+
+/* Светлая тема (по твоему первому CSS) */
+:root {
+    --bg-color: #f5f5f5;
+    --panel-bg: #ffffff;
+    --header-bg: #0057b8;
+    --header-color: #ffffff;
+    --text-color: #333333;
+    --secondary-text: #555555;
+    --link-color: #007BFF;
+    --link-hover-color: #ff6d2b;
+    --dropdown-bg: #fff;
+    --dropdown-hover: #e6e6e6;
+    --card-bg: #fff;
+    --card-alt-bg: #f0f6ff;
+    --error-bg: #ffdddd;
+    --error-border: red;
+    --dropdown-header-bg: #e8e8e8;
+    --btn-bg: #0057b8;
+    --btn-hover: #fc89ac;
+}
+
+/* Темная тема */
+[data-theme="dark"] {
+    --bg-color: #1A1C24;
+    --panel-bg: #2A2C36;
+    --header-bg: #22242D;
+    --header-color: #E0E2E6;
+    --text-color: #D1D4DA;
+    --secondary-text: #A3B0C3;
+    --link-color: #5A82A8;
+    --link-hover-color: #7EA4C7;
+    --dropdown-bg: #2A2C36;
+    --dropdown-hover: #343640;
+    --card-bg: #343640;
+    --card-alt-bg: #343640;
+    --error-bg: #4A1E1E;
+    --error-border: #B24C4C;
+    --dropdown-header-bg: #22242D;
+}
+
+/* ================== Основной CSS ================== */
+
 body {
     margin: 0;
-    background: #f5f5f5;
+    background: var(--bg-color);
     font-family: Arial, sans-serif;
+    color: var(--text-color);
 }
 
 header {
-    background: #0057b8;
-    color: white;
+    background: var(--header-bg);
+    color: var(--header-color);
     padding: 15px;
     text-align: center;
     font-size: 22px;
-    width: 100vw; /* Устанавливаем ширину равной полной ширине экрана */
-    position: relative; /* Фиксация положения заголовка */
-    z-index: 1; /* Предотвращаем наложение контентом сверху */
+    width: 100vw;
+    position: relative;
+    z-index: 1;
     margin-left: calc(-50vw + 50%);
 }
 
 nav {
-    display: flex; /* Использование Flexbox для точного размещения */
-    justify-content: center; /* Выравнивание элементов по центру */
-    align-items: center; /* Центрование по вертикали */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 10px 0;
 }
 
 nav a {
     margin: 0 15px;
     text-decoration: none;
-    color: #0057b8;
+    color: var(--secondary-text);
     font-size: 18px;
-    transition: color 0.3s ease-in-out; /* Плавный переход цвета */
-    cursor: default; /* Начальное состояние курсора */
+    transition: color 0.3s ease-in-out;
+    cursor: default;
 }
 
 nav a:hover {
-    color: #ff6d2b; /* Новый цвет при наведении */
-    cursor: pointer; /* Показываем курсор указательного пальца */
+    color: var(--link-hover-color);
+    cursor: pointer;
 }
 
 main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%; /* Ограничиваем ширину main до 100% родителя */
-    max-width: 1200px; /* Максимальная ширина на больших экранах */
-    margin: 0 auto; /* Централизация горизонтально */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .search-panel {
-    background: white;
-    width: 100%; /* Панели занимают всю доступную ширину */
-    max-width: 450px; /* Максимальная ширина панели */
+    background: var(--panel-bg);
+    width: 100%;
+    max-width: 450px;
     padding: 30px;
     margin-top: 30px;
     border-radius: 10px;
@@ -69,10 +113,11 @@ main {
 .dropdown-header {
     display: flex;
     justify-content: space-between;
-    background: #e8e8e8;
+    background: var(--dropdown-header-bg);
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
+    color: var(--text-color);
 }
 
 .btn-dropdown {
@@ -80,66 +125,60 @@ main {
     border: none;
     font-size: 18px;
     cursor: pointer;
+    color: inherit;
 }
 
 .btn-dropdown:hover{
-    color: #999999;
+    color: var(--secondary-text);
 }
 
 .dropdown-list {
     list-style: none;
     padding: 10px;
     margin-top: 8px;
-    background: #fff;
+    background: var(--dropdown-bg);
     border-radius: 7px;
     box-shadow: 0 0 5px #ccc;
     max-height: 250px;
     overflow-y: auto;
 }
 
-/* Выделение пункта при наведении */
 .dropdown-list li:hover {
-    background-color: #e6e6e6;
+    background-color: var(--dropdown-hover);
     display: flex;
 }
-
 
 .hidden {
     display: none;
 }
 
-
-
 .btn-search {
     width: 100%;
     padding: 12px;
-    background: #0057b8;
+    background: var(--btn-bg);
     color: white;
     font-size: 18px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-
 }
 
 .btn-search:hover{
-    background: #fc89ac;
+    background: var(--btn-hover);
 }
-
-
 
 .error-box {
     margin-top: 15px;
     padding: 10px;
-    background: #ffdddd;
-    border-left: 4px solid red;
+    background: var(--error-bg);
+    border-left: 4px solid var(--error-border);
     display: none;
 }
 
 .results-panel {
-    background: white;
-    width: 100%; /* Панель занимает всю доступную ширину */
-    max-width: 900px; /* Максимальная ширина панели */
+    background: var(--panel-bg);
+    width: 100%;
+    max-width: 900px;
     margin-top: 35px;
     padding: 30px;
     border-radius: 12px;
@@ -158,31 +197,30 @@ main {
 #results li {
     padding: 12px;
     margin-bottom: 20px;
-    background: #f0f6ff;
+    background: var(--card-alt-bg);
     border-radius: 10px;
 }
 
 #results li ul {
     margin-top: 8px;
 }
+
 .university-item {
     margin-bottom: 20px;
     position: relative;
     padding: 10px;
-    background-color: #fff;
+    background-color: var(--card-bg);
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-
 .city-list {
-    color: #777;
+    color: var(--secondary-text);
     font-size: 0.9em;
     display: block;
     margin-top: 5px;
 }
 
-/* Структура списка программ */
 .program-list {
     margin-top: 10px;
     padding-left: 0;
@@ -200,10 +238,9 @@ main {
 }
 
 .program-item:hover {
-    background-color: #fafafa;
+    background-color: var(--dropdown-hover);
 }
 
-/* Информация о программах */
 .program-info {
     display: flex;
     justify-content: space-between;
@@ -213,53 +250,35 @@ main {
 .program-name {
     font-size: 1.1em;
     font-weight: bold;
-    color: #333;
+    color: var(--link-color);
 }
 
 .requirements-text {
     font-size: 14px;
-    color: #555;
+    color: var(--secondary-text);
     margin-top: 5px;
 }
 
 .university-name{
     font-size:16px;
+    color: var(--text-color);
 }
 
-
-/* Название программы становится активной ссылкой */
-/* Основной стиль ссылки */
 .program-link {
-    font-size: 1.2em;          /* Увеличение размера текста */
+    font-size: 1.2em;
     font-weight: bold;
-    color: #007BFF;           /* Начальный цвет ссылки */
-    text-decoration: none; /* Подчеркивание ссылки */
-    cursor: pointer;           /* Курсор для настольных устройств */
-    transition: color 0.3s ease-in-out; /* Переходы цвета */
-    outline: none;              /* Убираем стандартный контур */
+    color: var(--link-color);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
 }
 
-/* Эффект при наведении на компьютеры с мышью */
-.program-link:hover {
-    color: #ff6d2b;           /* Цвет при наведении */
-}
-
-/* Эффект при нажатии на телефон (активное состояние) */
-.program-link:active {
-    color: #ff6d2b;           /* Цвет при нажатии */
-}
-
-/* Фокусировка при выделении клавиатурой */
+.program-link:hover,
+.program-link:active,
 .program-link:focus {
-    color: #ff6d2b;           /* Цвет при фокусировке */
+    color: var(--link-hover-color);
 }
 
-/* Удаляем нестандартное поведение фона при фокусе в Firefox */
-.program-link::-moz-focus-inner {
-    border: 0;
-}
-
-/* Переключатель стран */
 .country-switch {
     display: flex;
     align-items: center;
@@ -305,127 +324,46 @@ input:checked + .slider:before {
     transform: translateX(32px);
 }
 
+.theme-switch {
+    position: fixed;       /* фиксируем вне скролла */
+    bottom: 20px;          /* отступ от нижнего края */
+    right: 20px;           /* отступ от правого края */
+    z-index: 1000;         /* поверх всего контента */
+    display: flex;
+    align-items: center;
+    gap: 8px;              /* расстояние между переключателем и текстом */
+    background: var(--panel-bg);  /* фон панели под темой */
+    padding: 8px 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Поддержка темной темы */
+[data-theme="dark"] .theme-switch {
+    background: var(--panel-bg);
+    color: var(--text-color);
+}
 
 
-/* Медиа-запросы для адаптивности */
+/* ================== MEDIA QUERIES ================= */
+
 @media screen and (max-width: 600px) {
-    nav {
-        width: fit-content; /* Автоматически подобранная ширина */
-        margin: 0 auto; /* Горизонтальное центирование */
-    }
-
-    nav a {
-        margin: 10px 10px; /* Уменьшаем расстояние между элементами */
-        font-size: 14px; /* Уменьшаем размер шрифта для экономии места */
-    }
-    body {
-        font-size: 14px;
-    }
-
-    header {
-        font-size: 16px;
-        text-align: center;
-    }
-
-    main {
-        justify-content: center;
-    }
-
-    .search-panel,
-    .results-panel {
-        width: 75%; /* Полностью занимаем доступную ширину */
-        justify-content: center;
-    }
-
-    .search-panel h1 {
-        font-size: 18px;
-    }
-
-    .dropdown-block {
-        margin-bottom: 15px;
-    }
-
-    .btn-dropdown {
-        font-size: 16px;
-    }
-
-    .dropdown-list {
-        max-height: 150px;
-    }
-
-    .btn-search {
-        font-size: 16px;
-    }
-
-    .error-box {
-        margin-top: 10px;
-    }
-
-    #results li {
-        padding: 10px;
-    }
-
-    .country-switch {
-        flex-wrap: wrap;
-    }
-    .requirements-text{
-        font-size: 12px;
-    }
-    .university-name{
-    font-size:14px;
-    }
+    nav a { font-size: 14px; }
+    .search-panel, .results-panel { width: 75%; }
+    .requirements-text{ font-size: 12px; }
+    .university-name{ font-size:14px; }
 }
 
 @media screen and (min-width: 601px) and (max-width: 1024px) {
-    body {
-        font-size: 16px;
-    }
-
-    header {
-        font-size: 22px;
-    }
-
-    nav a {
-        font-size: 20px;
-    }
-
-    .search-panel,
-    .results-panel {
-        width: 80%; /* Гибкая ширина */
-    }
-    .requirements-text{
-        font-size: 14px;
-    }
-    .university-name{
-    font-size:14px;
-    }
+    nav a { font-size: 20px; }
+    .search-panel, .results-panel { width: 80%; }
+    .requirements-text{ font-size: 14px; }
+    .university-name{ font-size:14px; }
 }
 
 @media screen and (min-width: 1025px) {
-    body {
-        font-size: 18px;
-    }
-
-    header {
-        font-size: 24px;
-    }
-
-    nav a {
-        font-size: 22px;
-    }
-
-    main {
-        justify-content: center;
-    }
-
-    .search-panel,
-    .results-panel {
-        width: 90%; /* Панели растягиваются до максимальной доступной ширины */
-    }
-    .requirements-text{
-        font-size: 18px;
-    }
-    .university-name{
-    font-size:18px;
-}
+    nav a { font-size: 22px; }
+    .search-panel, .results-panel { width: 90%; }
+    .requirements-text{ font-size: 18px; }
+    .university-name{ font-size:18px; }
 }

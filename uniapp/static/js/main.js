@@ -199,3 +199,25 @@ Object.entries(data).forEach(([universityName, details]) => {
         cb.addEventListener("change", updateLabels)
     );
 });
+
+const toggle = document.getElementById('theme-toggle');
+
+toggle.addEventListener('change', () => {
+    if (toggle.checked) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+    }
+});
+
+// При загрузке страницы проверяем сохранённую тему
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    toggle.checked = true;
+} else {
+    document.documentElement.removeAttribute('data-theme');
+    toggle.checked = false;
+}
