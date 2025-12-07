@@ -39,6 +39,10 @@
 }
 
 /* Общий стиль */
+
+* {
+    box-sizing: border-box; /* Включает отступы и границы в ширину элемента */
+}
 body {
     margin: 0;
     background: var(--bg-color);
@@ -117,6 +121,10 @@ main {
     background: transparent;
     cursor: pointer;
     font-size: 18px;
+    color: #ccc;
+}
+.btn-dropdown:hover{
+    color: #bababa;
 }
 
 .dropdown-list {
@@ -283,7 +291,6 @@ input:checked + .slider:before { transform: translateX(32px); }
 
 /* Theme switch panel */
 .theme-switch {
-    position: fixed;
     right: 22px;
     bottom: 22px;
     padding: 10px 14px;
@@ -296,7 +303,289 @@ input:checked + .slider:before { transform: translateX(32px); }
 }
 
 /* ---------- ADAPTIVE ---------- */
+/* Extra small devices (phones, 600px and down) */
+/* Extra small devices (phones, 600px and down) */
 @media (max-width: 600px) {
-    .search-panel, .results-panel { width: 90%; }
-    .theme-switch { right: 10px; bottom: 10px; }
+    /* Настройки для очень маленьких экранов */
+    header {
+        font-size: 16px;
+    }
+
+    nav a {
+        font-size: 14px;
+    }
+
+    .search-panel, .results-panel {
+        width: 90%;
+    }
+
+    .theme-switch {
+        right: 10px;
+        bottom: 10px;
+    }
+
+    .btn-search {
+        font-size: 14px;
+    }
+
+    .program-link {
+        font-size: 18px;
+    }
+
+    .requirements-text {
+        font-size: 14px;
+    }
+
+    .country-switch {
+        font-size: 16px;
+    }
+
+    .switch {
+        width: 40px; /* Фиксированная ширина */
+        height: 20px; /* Фиксированная высота */
+    }
+
+    .slider {
+        border-radius: 28px;
+    }
+
+    .slider:before {
+        height: 14px;
+        width: 14px;
+        bottom: 3px;
+        left: 3px;
+    }
+
+    .university-name{
+        font-size:12px;
+    }
+
+    .university-item{
+        font-size:8px;
+    }
+
+    #theme-label{
+        font-size: 14px;
+    }
+
+    .theme-switch{
+        margin-left: 65%;
+    }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media (min-width: 600px) {
+    /* Настройки для небольших экранов */
+    header {
+        font-size: 18px;
+    }
+
+    nav a {
+        font-size: 16px;
+    }
+
+    .search-panel, .results-panel {
+        width: 90%;
+    }
+
+    .theme-switch {
+        right: 22px;
+        bottom: 22px;
+    }
+
+    .btn-search {
+        font-size: 16px;
+    }
+
+    .program-link {
+        font-size: 20px;
+    }
+
+    .requirements-text {
+        font-size: 16px;
+    }
+
+    .country-switch {
+        font-size: 18px;
+    }
+
+    .switch {
+        width: 50px; /* Фиксированная ширина */
+        height: 24px; /* Фиксированная высота */
+    }
+
+    .slider {
+        border-radius: 30px;
+    }
+
+    .slider:before {
+        height: 18px;
+        width: 18px;
+        bottom: 3px;
+        left: 3px;
+    }
+
+    #theme-label{
+        font-size:16px;
+    }
+
+    .theme-switch{
+        margin-left: 80%;
+    }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media (min-width: 768px) {
+    /* Настройки для средних экранов */
+    header {
+        font-size: 20px;
+    }
+
+    nav a {
+        font-size: 18px;
+    }
+
+    .search-panel, .results-panel {
+        width: 80%;
+    }
+
+    .btn-search {
+        font-size: 18px;
+    }
+
+    .program-link {
+        font-size: 22px;
+    }
+
+    .requirements-text {
+        font-size: 18px;
+    }
+
+    .country-switch {
+        font-size: 20px;
+    }
+
+    .switch {
+        width: 60px; /* Фиксированная ширина */
+        height: 28px; /* Фиксированная высота */
+    }
+
+    .slider {
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        height: 22px;
+        width: 22px;
+        bottom: 3px;
+        left: 3px;
+    }
+
+    #theme-label{
+        font-size: 18px;
+    }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media (min-width: 992px) {
+    /* Настройки для больших экранов */
+    header {
+        font-size: 22px;
+    }
+
+    nav a {
+        font-size: 20px;
+    }
+
+    .search-panel, .results-panel {
+        width: 70%;
+    }
+
+    .btn-search {
+        font-size: 20px;
+    }
+
+    .program-link {
+        font-size: 24px;
+    }
+
+    .requirements-text {
+        font-size: 20px;
+    }
+
+    .country-switch {
+        font-size: 22px;
+    }
+
+    .switch {
+        width: 70px; /* Фиксированная ширина */
+        height: 30px; /* Фиксированная высота */
+    }
+
+    .slider {
+        border-radius: 38px;
+    }
+
+    .slider:before {
+        height: 24px;
+        width: 24px;
+        bottom: 3px;
+        left: 3px;
+    }
+
+    #theme-label{
+        font-size: 20px;
+    }
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    /* Настройки для очень больших экранов */
+    header {
+        font-size: 24px;
+    }
+
+    nav a {
+        font-size: 22px;
+    }
+
+    .search-panel, .results-panel {
+        width: 60%;
+    }
+
+    .btn-search {
+        font-size: 22px;
+    }
+
+    .program-link {
+        font-size: 26px;
+    }
+
+    .requirements-text {
+        font-size: 22px;
+    }
+
+    .country-switch {
+        font-size: 24px;
+    }
+
+    .switch {
+        width: 80px; /* Фиксированная ширина */
+        height: 32px; /* Фиксированная высота */
+    }
+
+    .slider {
+        border-radius: 40px;
+    }
+
+    .slider:before {
+        height: 26px;
+        width: 26px;
+        bottom: 3px;
+        left: 3px;
+    }
+
+    #theme-label{
+        font-size: 22px;
+    }
 }
