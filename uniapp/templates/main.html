@@ -9,9 +9,8 @@
 
 <body>
 
-<header>
-    Университетский портал
-</header>
+<header>Университетский портал</header>
+
 <nav>
     <a href="/">Главная</a>
     <a href="/admin_auth">Админ</a>
@@ -20,9 +19,8 @@
 <main>
 
     <div class="search-panel">
-        <h1>Поиск университетов</h1>
+        <div class="uni_find"><h1>Поиск университетов</h1></div>
 
-        <!-- Переключатель стран -->
         <div class="country-switch">
             <label class="switch">
                 <input type="checkbox" id="country-toggle">
@@ -33,7 +31,6 @@
 
         <form id="search-form">
 
-            <!-- Предметы -->
             <div class="dropdown-block">
                 <div class="dropdown-header">
                     <span class="label subjects-label">Предметы</span>
@@ -54,15 +51,12 @@
                 </ul>
             </div>
 
-            <!-- Города -->
             <div class="dropdown-block">
                 <div class="dropdown-header">
                     <span class="label cities-label">Города</span>
                     <button class="btn-dropdown cities-btn">▼</button>
                 </div>
-                <ul class="dropdown-list cities-list hidden">
-                    <!-- Сюда JS вставит города -->
-                </ul>
+                <ul class="dropdown-list cities-list hidden"></ul>
             </div>
 
             <button type="submit" class="btn-search">Искать</button>
@@ -78,10 +72,10 @@
     </div>
 
     <div class="theme-switch">
-            <label class="switch">
-                <input type="checkbox" id="theme-toggle">
-                <span class="slider"></span>
-            </label>
+        <label class="switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
         <span id="theme-label">Тема</span>
     </div>
 

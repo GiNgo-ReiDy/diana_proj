@@ -1,66 +1,44 @@
-/* ================== CSS ПЕРЕМЕННЫЕ ================== */
-
-/* Светлая тема (по твоему первому CSS) */
 :root {
-    --bg-color: #f5f5f5;                     /* Очень светлый фон */
-    --panel-bg: #fafafa;                     /* Полностью белая панель */
-    --header-bg: #a353cf;                   /* Градиент глубокий фиолетовый */
-    --header-color: #FFFFFF;                 /* Белый текст заголовка */
-    --text-color: #333333;                   /* Классический чёрный текст */
-    --secondary-text: #757575;               /* Умеренно-темный серый */
-    --link-color: #8c46b3;                   /* Фиолетовый цвет ссылок */
-    --link-hover-color: #6e328f;             /* Изменение цвета ссылок при наведении */
-    --dropdown-bg: #FFFFFF;                  /* Чисто белый фон для выпадающих меню */
-    --dropdown-hover: #EDEDED;               /* Лёгкая тень при наведении */
-    --card-bg: #FFFFFF;                      /* Белая подложка карточек */
-    --card-alt-bg: #f7f5f7;                  /* Альтернативный фон карточек */
-    --error-bg: #FFDDDD;                     /* Нежно-розовый фон ошибок */
-    --error-border: #D32F2F;                 /* Граница ошибок красная */
-    --dropdown-header-bg: #f7f5f7;           /* Штриховка шапки списка */
-    --btn-bg: #a353cf;                       /* Основная кнопка фиолетовая */
-    --btn-hover: #753896;                    /* Меняется на насыщенный фиолетовый при наведении */
+    --bg-color: #eae8f3;
+    --panel-bg: #ffffff;
+    --header-bg: #8a3bd3;
+    --header-color: #ffffff;
+    --text-color: #2f2f2f;
+    --secondary-text: #666;
+    --link-color: #8a3bd3;
+    --link-hover-color: #6c2da5;
+    --dropdown-bg: #ffffff;
+    --dropdown-hover: #f1eef8;
+    --card-bg: #ffffff;
+    --card-alt-bg: #f7f5fb;
+    --error-bg: #ffd6d6;
+    --error-border: #d32f2f;
+    --dropdown-header-bg: #f1eef7;
+    --btn-bg: #8a3bd3;
+    --btn-hover: #6c2da5;
 }
-/*#1f1e2e*/
+
 [data-theme="dark"] {
-    --bg-color: #1f1e2e;                     /* Более светлый оттенок черного фона */
-    --panel-bg: #353347;                     /* Немного светлее панели */
-    --header-bg: #8822e6;                   /* Все тот же насыщенный фиолетовый */
-    --header-color: #EBEBEB;                 /* Светлый текст заголовков */
-    --text-color: #BBBBBB;                   /* Немного осветляем основной текст */
-    --secondary-text: #c2c2c2;               /* Средний серый вторичный текст */
-    --link-color: #9425fa;                   /* Оставляем привычный фиолетовый цвет ссылок */
-    --link-hover-color: #8822e6;             /* Изменяем цвет ссылок при наведении */
-    --dropdown-bg: #353445;                  /* Основание для выпадающих меню */
-    --dropdown-hover: #464559;               /* Немного ярче при наведении */
-    --card-bg: #595959;                      /* Немного светлее карты */
-    --card-alt-bg: #45425c;                  /* Альтернативный фон */
-    --error-bg: #4A1E1E;                     /* Остается прежним бордовым */
-    --error-border: #EF5350;                 /* Красный контур ошибок */
-    --dropdown-header-bg: #524f6e;           /* Средняя интенсивность фона шапки */
-    --btn-bg: #8822e6;                       /* Главный цвет кнопок остаётся фиолетовым */
-    --btn-hover: #6418ab;                    /* При наведении появляется более насыщенный оттенок */
+    --bg-color: #1e1d29;
+    --panel-bg: #2f2d3b;
+    --header-bg: #7920c5;
+    --header-color: #e6e6e6;
+    --text-color: #dcdcdc;
+    --secondary-text: #bdbdbd;
+    --link-color: #b47aff;
+    --link-hover-color: #9255e8;
+    --dropdown-bg: #3a384a;
+    --dropdown-hover: #4b465e;
+    --card-bg: #45435a;
+    --card-alt-bg: #3b3950;
+    --error-bg: #4a1e1e;
+    --error-border: #ef5350;
+    --dropdown-header-bg: #3b3950;
+    --btn-bg: #7920c5;
+    --btn-hover: #5d1897;
 }
-/*!* Темная тема *!*/
-/*[data-theme="dark"] {*/
-/*    --bg-color: #1A1C24;*/
-/*    --panel-bg: #2A2C36;*/
-/*    --header-bg: #22242D;*/
-/*    --header-color: #E0E2E6;*/
-/*    --text-color: #D1D4DA;*/
-/*    --secondary-text: #A3B0C3;*/
-/*    --link-color: #5A82A8;*/
-/*    --link-hover-color: #7EA4C7;*/
-/*    --dropdown-bg: #2A2C36;*/
-/*    --dropdown-hover: #343640;*/
-/*    --card-bg: #343640;*/
-/*    --card-alt-bg: #343640;*/
-/*    --error-bg: #4A1E1E;*/
-/*    --error-border: #B24C4C;*/
-/*    --dropdown-header-bg: #22242D;*/
-/*}*/
 
-/* ================== Основной CSS ================== */
-
+/* Общий стиль */
 body {
     margin: 0;
     background: var(--bg-color);
@@ -68,6 +46,7 @@ body {
     color: var(--text-color);
 }
 
+/* ---------- HEADER ---------- */
 header {
     background: var(--header-bg);
     color: var(--header-color);
@@ -75,38 +54,33 @@ header {
     text-align: center;
     font-size: 22px;
     width: 100vw;
-    position: relative;
-    z-index: 1;
     margin-left: calc(-50vw + 50%);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
+/* ---------- NAV ---------- */
 nav {
     display: flex;
     justify-content: center;
-    align-items: center;
-    margin: 10px 0;
+    gap: 25px;
+    margin-top: 10px;
 }
 
 nav a {
-    margin: 0 15px;
-    text-decoration: none;
     color: var(--secondary-text);
+    text-decoration: none;
     font-size: 18px;
-    transition: color 0.3s ease-in-out;
-    cursor: default;
+    transition: .25s;
 }
 
 nav a:hover {
     color: var(--link-hover-color);
-    cursor: pointer;
 }
 
+/* ---------- SEARCH PANEL ---------- */
 main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 1200px;
+    width: 92%;
+    max-width: 1100px;
     margin: 0 auto;
 }
 
@@ -114,98 +88,90 @@ main {
     background: var(--panel-bg);
     width: 100%;
     max-width: 450px;
-    padding: 30px;
-    margin-top: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #ccc;
+    margin: 30px auto 0 auto;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.18);
 }
 
-.search-panel h1 {
+.uni_find {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
-.dropdown-block {
-    margin-bottom: 20px;
-}
+/* Селекторы */
+.dropdown-block { margin-bottom: 15px; }
 
 .dropdown-header {
+    background: var(--dropdown-header-bg);
+    padding: 10px 14px;
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
-    background: var(--dropdown-header-bg);
-    padding: 10px;
-    border-radius: 5px;
     cursor: pointer;
-    color: var(--text-color);
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
 }
 
 .btn-dropdown {
-    background: none;
     border: none;
-    font-size: 18px;
+    background: transparent;
     cursor: pointer;
-    color: inherit;
-}
-
-.btn-dropdown:hover{
-    color: var(--secondary-text);
+    font-size: 18px;
 }
 
 .dropdown-list {
     list-style: none;
-    padding: 10px;
+    padding: 12px;
     margin-top: 8px;
+    border-radius: 10px;
     background: var(--dropdown-bg);
-    border-radius: 7px;
-    box-shadow: 0 0 5px #ccc;
-    max-height: 250px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    max-height: 230px;
     overflow-y: auto;
 }
 
-.dropdown-list li:hover {
-    background-color: var(--dropdown-hover);
-    display: flex;
-}
+.dropdown-list li { padding: 6px 4px; }
+.dropdown-list li:hover { background: var(--dropdown-hover); }
 
-.hidden {
-    display: none;
-}
+.hidden { display: none; }
 
+/* ---------- BUTTON ---------- */
 .btn-search {
+    margin-top: 10px;
     width: 100%;
-    padding: 12px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
     background: var(--btn-bg);
     color: white;
     font-size: 18px;
-    border: none;
-    border-radius: 8px;
     cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.22);
+    transition: .25s;
 }
-
-.btn-search:hover{
+.btn-search:hover {
     background: var(--btn-hover);
+    transform: translateY(-2px);
 }
 
+/* ---------- ERROR ---------- */
 .error-box {
-    margin-top: 15px;
     padding: 10px;
+    margin-top: 12px;
     background: var(--error-bg);
     border-left: 4px solid var(--error-border);
     display: none;
 }
 
+/* ---------- RESULTS PANEL ---------- */
 .results-panel {
     background: var(--panel-bg);
+    padding: 25px;
+    margin: 35px auto;
     width: 100%;
-    max-width: 900px;
-    margin-top: 35px;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px #ccc;
-}
-
-.results-panel h2 {
-    text-align: center;
+    max-width: 850px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
 }
 
 #results ul {
@@ -213,96 +179,73 @@ main {
     padding: 0;
 }
 
-#results li {
-    padding: 12px;
-    margin-bottom: 20px;
-    background: var(--card-alt-bg);
-    border-radius: 10px;
-}
-
-#results li ul {
-    margin-top: 8px;
-}
-
+/* ---------- CLEAN OUTPUT ---------- */
 .university-item {
-    margin-bottom: 20px;
-    position: relative;
-    padding: 10px;
-    background-color: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 14px;
+    margin-bottom: 22px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+.university-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--text-color);
 }
 
 .city-list {
     color: var(--secondary-text);
-    font-size: 0.9em;
-    display: block;
-    margin-top: 5px;
+    margin-top: 4px;
+    font-size: 14px;
 }
 
+/* Programs */
 .program-list {
-    margin-top: 10px;
-    padding-left: 0;
+    margin-top: 12px;
+    padding: 0;
     list-style: none;
 }
 
 .program-item {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    transition: background-color 0.3s ease-in-out;
+    padding: 12px 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
-.program-item:last-child {
-    border-bottom: none;
-}
-
-.program-item:hover {
-    background-color: var(--dropdown-hover);
-}
+.program-item:last-child { border-bottom: none; }
 
 .program-info {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-}
-
-.program-name {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: var(--link-color);
-}
-
-.requirements-text {
-    font-size: 14px;
-    color: var(--secondary-text);
-    margin-top: 5px;
-}
-
-.university-name{
-    font-size:16px;
-    color: var(--text-color);
+    justify-content: space-between;
+    font-size: 24px;
 }
 
 .program-link {
-    font-size: 1.2em;
     font-weight: bold;
     color: var(--link-color);
     text-decoration: none;
-    cursor: pointer;
-    transition: color 0.3s ease-in-out;
+    transition: .25s;
 }
 
-.program-link:hover,
-.program-link:active,
-.program-link:focus {
+.program-link:hover {
     color: var(--link-hover-color);
 }
+
+.requirements-text {
+    color: var(--secondary-text);
+    font-size: 18px;
+    margin-top: 5px;
+}
+
+/* ---------- SWITCHES ---------- */
 
 .country-switch {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
-    gap: 10px;
+    gap: 8px;
+    font-size: 20px;
+    margin-bottom: 12px;
 }
 
 .switch {
@@ -312,89 +255,48 @@ main {
     height: 28px;
 }
 
-.switch input { display:none; }
+.switch input { display: none; }
 
 .slider {
     position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
+    inset: 0;
+    background: #ccc;
     border-radius: 34px;
+    cursor: pointer;
+    transition: .4s;
 }
 
 .slider:before {
-    position: absolute;
     content: "";
+    position: absolute;
     height: 22px;
     width: 22px;
-    left: 3px;
     bottom: 3px;
-    background-color: white;
-    transition: .4s;
+    left: 3px;
     border-radius: 50%;
+    background: white;
+    transition: .4s;
 }
 
-input:checked + .slider {
-    background-color: #7E57C2;
-}
+input:checked + .slider { background: #8a3bd3; }
+input:checked + .slider:before { transform: translateX(32px); }
 
-input:checked + .slider:before {
-    transform: translateX(32px);
-}
-
+/* Theme switch panel */
 .theme-switch {
-    position: fixed;       /* фиксируем вне скролла */
-    bottom: 20px;          /* отступ от нижнего края */
-    right: 20px;           /* отступ от правого края */
-    z-index: 1000;         /* поверх всего контента */
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    background: var(--panel-bg);
     display: flex;
     align-items: center;
-    gap: 8px;              /* расстояние между переключателем и текстом */
-    background: var(--panel-bg);  /* фон панели под темой */
-    padding: 8px 12px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 }
 
-/* Поддержка темной темы */
-[data-theme="dark"] .theme-switch {
-    background: var(--panel-bg);
-    color: var(--text-color);
-}
-
-
-/* ================== MEDIA QUERIES ================= */
-
-@media screen and (max-width: 600px) {
-    nav a { font-size: 14px; }
-    .search-panel, .results-panel { width: 75%; }
-    .requirements-text{ font-size: 12px; }
-    .university-name{ font-size:14px; }
-        .theme-switch {
-        position: fixed; /* Используем фиксированное позиционирование */
-        bottom: -10px;    /* Располагаем кнопку снизу страницы */
-        left: 50%;
-
-    }
-}
-
-@media screen and (min-width: 601px) and (max-width: 1024px) {
-    nav a { font-size: 20px; }
-    .search-panel, .results-panel { width: 80%; }
-    .requirements-text{ font-size: 14px; }
-    .university-name{ font-size:14px; }
-        .theme-switch {
-        position: absolute; /* Абсолютное позиционирование */
-        bottom: 40px;       /* Немного сдвинем кнопку ближе к низу */
-        right: 20px;        /* Отодвигаем от правого края */
-    }
-}
-
-@media screen and (min-width: 1025px) {
-    nav a { font-size: 22px; }
+/* ---------- ADAPTIVE ---------- */
+@media (max-width: 600px) {
     .search-panel, .results-panel { width: 90%; }
-    .requirements-text{ font-size: 18px; }
-    .university-name{ font-size:18px; }
-
+    .theme-switch { right: 10px; bottom: 10px; }
 }
