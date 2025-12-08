@@ -506,11 +506,11 @@ input:checked + .slider:before { transform: translateX(32px); }
     }
 
     .program-link {
-        font-size: 24px;
+        font-size: 22px;
     }
 
     .requirements-text {
-        font-size: 20px;
+        font-size: 18px;
     }
 
     .country-switch {
@@ -558,11 +558,11 @@ input:checked + .slider:before { transform: translateX(32px); }
     }
 
     .program-link {
-        font-size: 26px;
+        font-size: 24px;
     }
 
     .requirements-text {
-        font-size: 22px;
+        font-size: 20px;
     }
 
     .country-switch {

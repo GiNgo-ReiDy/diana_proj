@@ -20,7 +20,7 @@
         fontSize: '15px',
         textDecoration: 'none',
         color: '#ffffff',
-        background: '#007bff',
+        background: '#8a3bd3',
         boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
         zIndex: '99999',
         display: 'inline-flex',
@@ -34,12 +34,12 @@
     // Поведение hover/active через JS (для браузеров, где CSS может быть перекрыт)
     btn.addEventListener('mouseenter', () => {
         btn.style.transform = 'translateY(-3px)';
-        btn.style.background = '#0063d1';
+        btn.style.background = '#6c2da5';
         btn.style.boxShadow = '0 10px 24px rgba(0,0,0,0.22)';
     });
     btn.addEventListener('mouseleave', () => {
         btn.style.transform = '';
-        btn.style.background = '#007bff';
+        btn.style.background = '#8a3bd3';
         btn.style.boxShadow = '0 6px 18px rgba(0,0,0,0.18)';
     });
     btn.addEventListener('mousedown', () => btn.style.transform = 'translateY(0)');

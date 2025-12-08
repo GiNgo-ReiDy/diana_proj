@@ -59,14 +59,14 @@ th {
         }
 
 .edit-btn {
-            background: #007bff;
+            background: #8a3bd3;
             color: white;
             margin-top: 5px;
             transition: box-shadow 3.15s ease-out;
         }
 .edit-btn:hover{
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            background: #0057b8;
+            background: #6c2da5;
 }
 .delete-btn {
             background: #dc3545;
@@ -82,7 +82,7 @@ th {
 
 /* Модальное окно */
 .modal-container {
-    display: block;
+    display: flex;
     position: fixed;
     top: 0;
     left: 0;
@@ -103,11 +103,40 @@ th {
     text-align: center;
 }
 
+button[type=button]:not(:disabled) {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50; /* Зеленовато-голубой */
+    color: white;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+button[type=button]:hover:not(:disabled),
+button[type=button]:focus:not(:disabled) {
+    background-color: #45a049; /* Темнее при наведении */
+}
+
+button[type=button][disabled],
+button[type=button][disabled]:hover {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
 .close-btn {
-    color: #007bff;
+    color: #4CAF50;
     float: right;
     font-size: 28px;
     cursor: pointer;
+}
+
+.close-btn:hover{
+    color:#45a049;
 }
 
 .floating-home-btn {
@@ -123,7 +152,7 @@ th {
   font-size: 15px;
   text-decoration: none;
   color: #ffffff;
-  background: #007bff;
+  background: #8a3bd3;
   box-shadow: 0 6px 18px rgba(0,0,0,0.18);
   z-index: 9999;
   transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
@@ -134,7 +163,7 @@ th {
 
 .floating-home-btn:hover {
   transform: translateY(-3px);
-  background: #0063d1;
+  background: #6c2da5;
   box-shadow: 0 10px 24px rgba(0,0,0,0.22);
 }
 
@@ -144,7 +173,7 @@ th {
 
 /* Небольшой доступный фокус (для клавиатуры) */
 .floating-home-btn:focus {
-  outline: 3px solid rgba(0, 123, 255, 0.25);
+  outline: 3px solid rgba(108, 45, 165, 0.25);
   outline-offset: 2px;
 }
 
