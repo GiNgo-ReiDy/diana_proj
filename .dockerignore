@@ -1,0 +1,39 @@
+# Виртуальное окружение
+env/
+venv/
+.venv/
+
+# Python кэш
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Логи
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Тесты
+test.py
+
+

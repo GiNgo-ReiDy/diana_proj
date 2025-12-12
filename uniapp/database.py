@@ -1,7 +1,11 @@
+import os
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-DATABASE_URL = "postgresql+asyncpg://uniuser:1234@localhost:5432/universities"
-#потом видимо вместо юзера и пасворда что-то подставим
+# Поддержка переменных окружения для Docker
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+asyncpg://uniuser:1234@localhost:5432/universities"
+)
 
 engine = create_async_engine(
     DATABASE_URL,
