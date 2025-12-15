@@ -7,10 +7,15 @@ services:
       POSTGRES_USER: uniuser
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: universities
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./pg_dumps/:/docker-entrypoint-initdb.d/
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U uniuser"]
       interval: 10s
@@ -19,7 +24,7 @@ services:
 
   web:
     build: .
-    command: uvicorn uniapp.app:app --host 0.0.0.0 --port 8000 --reload
+    command: bash start.sh uvicorn uniapp.app:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - .:/app
     ports:
