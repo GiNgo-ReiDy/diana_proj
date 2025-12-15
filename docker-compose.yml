@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:16-alpine
@@ -10,15 +12,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./pg_dumps/:/docker-entrypoint-initdb.d/
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U uniuser"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U uniuser -d universities -h 0.0.0.0"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
 
   web:
     build: .
-    command: bash start.sh uvicorn uniapp.app:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn uniapp.app:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
     volumes:
       - .:/app
     ports:
@@ -27,7 +31,23 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql+asyncpg://uniuser:1234@db:5432/universities
+      DATABASE_URL: postgresql+asyncpg://uniuser:1234@db:5432/universities
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  db_init:
+    image: postgres:16-alpine
+    depends_on:
+      - db
+    volumes:
+      - ./pg_dumps/:/docker-entrypoint-initdb.d/
+    environment:
+      PGPASSWORD: 1234
+    command: ["sh", "-c", "until pg_isready -h db -U uniuser -d universities; do sleep 1; done; psql -h db -U uniuser -d universities -f /docker-entrypoint-initdb.d/01-universities.sql || true"]
+    restart: "no"
 
 volumes:
   postgres_data:

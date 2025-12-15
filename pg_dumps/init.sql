@@ -1,3 +1,0 @@
-CREATE USER uniuser WITH PASSWORD '1234';
-CREATE DATABASE universities OWNER uniuser;
-GRANT ALL PRIVILEGES ON DATABASE universities TO uniuser;
