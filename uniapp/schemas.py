@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class SearchUniversitiesRequest(BaseModel):
     subjects: List[str] = Field(default=[])
@@ -13,8 +13,7 @@ class Program(BaseModel):
     mask_required_all: int
     mask_required_any: int
     program_url : str
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class University(BaseModel):
@@ -22,14 +21,10 @@ class University(BaseModel):
     name: str
     cities: list[str]
     # programs: list[Program] = []
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Subjects(BaseModel):
     id: int
     name: str
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
